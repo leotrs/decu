@@ -24,3 +24,8 @@ features common to these tasks are:
 7. Integrates well with cloud services: have an automatic startup script
 
 
+# Best practices
+
+`decu` is built with Best Practices for Data Science in mind. See
+[1] http://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1001745
+[2] http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1005510
