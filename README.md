@@ -72,11 +72,11 @@ class MyScript(decu.Script):
     @figure
     def plot_results1(self, result):
         # plot a figure from the results..
-	    plt.savefig(..)   # or plt.show()
+        plt.savefig(..)   # or plt.show()
 
     @experiment
     def exp2(self, data, param):
-	    # do magic to the data...
+        # do magic to the data...
         return result
 
     @figure
