@@ -56,16 +56,39 @@ class Script():
         """Override this method with the main contents of the script."""
 
 
-def experiment(method):
-    """Decorator that adds logging functionality to experiment methods."""
-    @functools.wraps(method)
-    def decorated(*args, **kwargs):
-        logging.info('Starting experiment {} with param {}..'.format(
-            method.__name__, kwargs['param']))
-        start = time.time()
-        result = method(*args, **kwargs)
-        end = time.time()
-        logging.info('Finished experiment. Took {}'.format(end - start))
-        return result
+def experiment(arg_param=None):
+    """Decorator that adds logging functionality to experiment methods.
 
-    return decorated
+    Parameters
+    ----------
+
+    arg_param (str): The name of the argument that is treated by the method
+    as parameters of the experiment.
+
+    Returns
+    -------
+
+    A decorator that adds logging and bookkeeping functionality to its
+    argument.
+
+    """
+    def _experiment(method):
+        @functools.wraps(method)
+        def msg(param):
+            if arg_param is None:
+                return 'Starting experiment {}..'.format(method.__name__)
+            else:
+                return 'Starting experiment {} with param {}..'.format(
+                    method.__name__, param)
+
+        def decorated(*args, **kwargs):
+            logging.info(msg(kwargs.get(arg_param)))
+            start = time.time()
+            result = method(*args, **kwargs)
+            end = time.time()
+            logging.info('Finished experiment. Took {}'.format(end - start))
+            return result
+
+        return decorated
+
+    return _experiment

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 class MyScript(Script):
     """Dummy test class."""
 
-    @experiment
+    @experiment(arg_param='param')
     def exp1(self, data, param):
         """Compute x**param for each data point."""
         return np.array([np.power(x, param) for x in data])
