@@ -1,4 +1,4 @@
 *.egg-info*
 *.cache
 decu.egg-info/
-decu/__pycache__
+*__pycache__*
