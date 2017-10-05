@@ -6,13 +6,15 @@ This is a test script for decu.
 
 """
 
-import decu
+from decu import Script, experiment
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-class MyScript(decu.Script):
+class MyScript(Script):
+    """Dummy test class."""
 
+    @experiment
     def exp1(self, data, param):
         """Compute x**param for each data point."""
         return np.array([np.power(x, param) for x in data])
