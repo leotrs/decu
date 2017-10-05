@@ -16,7 +16,8 @@ figure, etc), saves some results to disk, and then quits. Some desired
 features common to these tasks are:
 
 1. Orderly, standardized logging
-2. Standardized file names for results and plots
+2. Standardized file names for results and plots (include datetime and
+   script name in the results file name)
 3. Devel and publish modes: during development, one usually doesn't need to
    run/test scripts with the same parameters as when publishing (e.g., plot
    all figure in 300 dpi but only in puslish mode)
