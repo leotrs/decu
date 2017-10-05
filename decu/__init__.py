@@ -60,7 +60,8 @@ def experiment(method):
     """Decorator that adds logging functionality to experiment methods."""
     @functools.wraps(method)
     def decorated(*args, **kwargs):
-        logging.info('Starting experiment..')
+        logging.info('Starting experiment {} with param {}..'.format(
+            method.__name__, kwargs['param']))
         start = time.time()
         result = method(*args, **kwargs)
         end = time.time()
