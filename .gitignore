@@ -2,3 +2,4 @@
 *.cache
 decu.egg-info/
 *__pycache__*
+logs
