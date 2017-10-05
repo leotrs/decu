@@ -32,27 +32,6 @@ class Script():
 
     def __init__(self, mode='devel'):
         self.mode = mode
-        # self.start_time = None
-        # self.finish_time = None
 
-    def main(*args, **kwargs):
+    def main(self, *args, **kwargs):
         """Override this method with the main contents of the script."""
-
-
-
-
-
-def main():
-    """Execute the script passed as command line argument."""
-    from argparse import ArgumentParser
-
-    parser = ArgumentParser(description='Experimental computation utilities.')
-    parser.add_argument('file', help='the script to be run')
-    args = parser.parse_args()
-
-    print(args)
-
-
-
-if __name__ == '__main__':
-    main()
