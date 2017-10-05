@@ -34,6 +34,19 @@ being done. Thus, `decu` provides standardization/automation of these
 tasks.
 
 
+# Installation
+
+Clone this repo, `cd` to the decu directory and do
+
+```
+$ pip install .
+
+```
+
+Now you have a local installation of decu. If you are going to make edits
+to decu, don't forget to use the `-e` flag.
+
+
 # Example use
 
 Suppose you have some data set and want to run an algorithm over it to
