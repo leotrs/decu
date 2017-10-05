@@ -12,6 +12,7 @@ import logging
 import inspect
 import functools
 from datetime import datetime
+from multiprocessing import Pool
 
 NOW = datetime.now()
 
@@ -48,14 +49,51 @@ class Script():
             # have no file attached.
             filename = '__main__'
         _, script_name = os.path.split(filename)
-        path = os.getcwd()
         self.logfile = '{}_{}.txt'.format(NOW, script_name)
-        self.logfile = os.path.join(path, self.LOGS_PATH, self.logfile)
+        self.logfile = os.path.join(os.getcwd(), self.LOGS_PATH, self.logfile)
         logging.basicConfig(level=logging.INFO, filename=self.logfile,
                             format=self.LOG_FMT, datefmt=self.TIME_FMT)
 
+    def run_parallel(self, exp, data, params):
+        """Run an experiment in parallel.
+
+        For each element p in params, call exp(data, p). These calls
+        are made in parallel using multiprocessing.
+
+        Parameters
+        ----------
+
+        exp (method): a method of this class that has been decoreted with
+        @experiment.
+
+        data (varies): the data set to feed the experiment.
+
+        params (list): the experiment will be run once for each element in
+        params.
+
+        Returns
+        -------
+
+        A dictionary of the form {p1:  result1, p2: result2, ...} where the
+        pi are the elements of params  and resulti is the result of calling
+        exp(data, pi).
+
+        """
+        with Pool(maxtasksperchild=100) as pool:
+            results = pool.starmap(exp, [(data, p) for p in params])
+        return {p: results[i] for i, p in enumerate(params)}
+
+
     def main(self, *args, **kwargs):
         """Override this method with the main contents of the script."""
+
+
+def _get_arg_value(method, arg_name, args, kwargs):
+    if arg_name in kwargs:
+        return kwargs[arg_name]
+    else:
+        index = inspect.getfullargspec(method).args.index(arg_name)
+        return args[index]
 
 
 def experiment(arg_param=None):
@@ -77,20 +115,30 @@ def experiment(arg_param=None):
     def _experiment(method):
         exp_name = method.__name__
 
-        @functools.wraps(method)
-        def msg(param):
+        def start_msg(param):
             if arg_param is None:
                 return 'Starting experiment {}..'.format(exp_name)
             else:
                 return 'Starting experiment {} with param {}..'.format(
                     exp_name, param)
 
+        def end_msg(param, time):
+            if arg_param is None:
+                return 'Finished experiment {}..'.format(exp_name)
+            else:
+                return 'Finished experiment {} with param {}. Took {:.3f}s'.format(
+                    exp_name, param, time)
+
+        @functools.wraps(method)
         def decorated(*args, **kwargs):
-            logging.info(msg(kwargs.get(arg_param)))
+            value = _get_arg_value(method, arg_param, args, kwargs)
+            logging.info(start_msg(value))
+
             start = time.time()
             result = method(*args, **kwargs)
             end = time.time()
-            logging.info('Finished experiment {}. Took {:.5f}s'.format(exp_name, end - start))
+
+            logging.info(end_msg(value, end - start))
             return result
 
         return decorated
