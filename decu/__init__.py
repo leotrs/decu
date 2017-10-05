@@ -35,7 +35,8 @@ class Script():
     RESULTS_PATH = 'results/'
     FIGURES_PATH = 'pics/'
     LOGS_PATH = 'logs/'
-
+    LOG_FMT = '[%(asctime)s]%(levelname)s: %(message)s'
+    TIME_FMT = '%H:%M:%S'
 
     def __init__(self, mode='devel'):
         self.mode = mode
@@ -50,7 +51,8 @@ class Script():
         path = os.getcwd()
         self.logfile = '{}_{}.txt'.format(NOW, script_name)
         self.logfile = os.path.join(path, self.LOGS_PATH, self.logfile)
-        logging.basicConfig(level=logging.INFO, filename=self.logfile)
+        logging.basicConfig(level=logging.INFO, filename=self.logfile,
+                            format=self.LOG_FMT, datefmt=self.TIME_FMT)
 
     def main(self, *args, **kwargs):
         """Override this method with the main contents of the script."""
@@ -73,20 +75,22 @@ def experiment(arg_param=None):
 
     """
     def _experiment(method):
+        exp_name = method.__name__
+
         @functools.wraps(method)
         def msg(param):
             if arg_param is None:
-                return 'Starting experiment {}..'.format(method.__name__)
+                return 'Starting experiment {}..'.format(exp_name)
             else:
                 return 'Starting experiment {} with param {}..'.format(
-                    method.__name__, param)
+                    exp_name, param)
 
         def decorated(*args, **kwargs):
             logging.info(msg(kwargs.get(arg_param)))
             start = time.time()
             result = method(*args, **kwargs)
             end = time.time()
-            logging.info('Finished experiment. Took {}'.format(end - start))
+            logging.info('Finished experiment {}. Took {:.5f}s'.format(exp_name, end - start))
             return result
 
         return decorated
