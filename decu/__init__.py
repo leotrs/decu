@@ -55,27 +55,27 @@ def run_parallel(exp, data, params):
     return {p: results[i] for i, p in enumerate(params)}
 
 
-def get_arg_value(method, arg_name, args, kwargs):
-    """Get the value of the parameter with name arg_name.
+def get_argument(method, param_name, args, kwargs):
+    """Get the argument passed to the parameter with name param_name.
 
     method is assumed to have been called as method(*args, **kwargs).
 
     """
-    if arg_name in kwargs:
-        return kwargs[arg_name]
+    if param_name in kwargs:
+        return kwargs[param_name]
     else:
-        index = inspect.getfullargspec(method).args.index(arg_name)
+        index = inspect.getfullargspec(method).args.index(param_name)
         return args[index]
 
 
-def experiment(arg_param=None):
+def experiment(exp_param=None):
     """Decorator that adds logging functionality to experiment methods.
 
     Parameters
     ----------
 
-    arg_param (str): The name of the argument that is treated by the method
-    as parameters of the experiment.
+    exp_param (str): The name of the parameter that is treated by the
+    method as a experimental parameter.
 
     Returns
     -------
@@ -101,14 +101,14 @@ def experiment(arg_param=None):
         exp_name = method.__name__
 
         def start_msg(param):
-            if arg_param is None:
+            if exp_param is None:
                 return 'Starting experiment {}..'.format(exp_name)
             else:
                 return 'Starting experiment {} with param {}..'.format(
                     exp_name, param)
 
         def end_msg(param, time):
-            if arg_param is None:
+            if exp_param is None:
                 return 'Finished experiment {}..'.format(exp_name)
             else:
                 return 'Finished experiment {} with param {}. Took {:.3f}s'.format(
@@ -116,7 +116,7 @@ def experiment(arg_param=None):
 
         @functools.wraps(method)
         def decorated(*args, **kwargs):
-            value = get_arg_value(method, arg_param, args, kwargs)
+            value = get_argument(method, exp_param, args, kwargs)
             logging.info(start_msg(value))
 
             start = time.time()

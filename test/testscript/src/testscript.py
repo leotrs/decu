@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-@experiment(arg_param='param')
+@experiment(exp_param='param')
 def exp(data, param):
     """Compute x**param for each data point."""
     logging.info('Working hard..')
