@@ -11,84 +11,56 @@ import time
 import logging
 import inspect
 import functools
-from datetime import datetime
 from multiprocessing import Pool
 
-NOW = datetime.now()
+
+DATA_PATH = 'data/'
+RESULTS_PATH = 'results/'
+FIGURES_PATH = 'pics/'
+LOGS_PATH = 'logs/'
+LOG_FMT = '[%(asctime)s]%(levelname)s: %(message)s'
+TIME_FMT = '%H:%M:%S'
 
 
-class Script():
-    """Base class for experimental computation scripts.
+__all__ = ['experiment', 'run_parallel', 'config_logging']
 
-    A script that is used for experimental computation usually performs the
-    following tasts in order:
 
-    1. Input: read data from disk, or scrape from the web,
-    2. Experiment: run an algorithm, train a model, and/or produce a
-    figure, and
-    3. Output: write to disk a results file.
+def run_parallel(exp, data, params):
+    """Run an experiment in parallel.
 
-    Script provides basic standardization and automation for these tasks.
+    For each element p in params, call exp(data, p). These calls
+    are made in parallel using multiprocessing.
+
+    Parameters
+    ----------
+
+    exp (method): a method of this class that has been decoreted with
+    @experiment.
+
+    data (varies): the data set to feed the experiment.
+
+    params (list): the experiment will be run once for each element in
+    params.
+
+    Returns
+    -------
+
+    A dictionary of the form {p1:  result1, p2: result2, ...} where the
+    pi are the elements of params  and resulti is the result of calling
+    exp(data, pi).
 
     """
-
-    DATA_PATH = 'data/'
-    RESULTS_PATH = 'results/'
-    FIGURES_PATH = 'pics/'
-    LOGS_PATH = 'logs/'
-    LOG_FMT = '[%(asctime)s]%(levelname)s: %(message)s'
-    TIME_FMT = '%H:%M:%S'
-
-    def __init__(self, mode='devel'):
-        self.mode = mode
-
-        try:
-            filename = inspect.getfile(self.__class__)
-        except TypeError as exc:
-            # When defining a subclass on the interpretr, the subclass will
-            # have no file attached.
-            filename = '__main__'
-        _, script_name = os.path.split(filename)
-        self.logfile = '{}_{}.txt'.format(NOW, script_name)
-        self.logfile = os.path.join(os.getcwd(), self.LOGS_PATH, self.logfile)
-        logging.basicConfig(level=logging.INFO, filename=self.logfile,
-                            format=self.LOG_FMT, datefmt=self.TIME_FMT)
-
-    def run_parallel(self, exp, data, params):
-        """Run an experiment in parallel.
-
-        For each element p in params, call exp(data, p). These calls
-        are made in parallel using multiprocessing.
-
-        Parameters
-        ----------
-
-        exp (method): a method of this class that has been decoreted with
-        @experiment.
-
-        data (varies): the data set to feed the experiment.
-
-        params (list): the experiment will be run once for each element in
-        params.
-
-        Returns
-        -------
-
-        A dictionary of the form {p1:  result1, p2: result2, ...} where the
-        pi are the elements of params  and resulti is the result of calling
-        exp(data, pi).
-
-        """
-        with Pool(maxtasksperchild=100) as pool:
-            results = pool.starmap(exp, [(data, p) for p in params])
-        return {p: results[i] for i, p in enumerate(params)}
+    with Pool(maxtasksperchild=100) as pool:
+        results = pool.starmap(exp, [(data, p) for p in params])
+    return {p: results[i] for i, p in enumerate(params)}
 
 
-    def main(self, *args, **kwargs):
-        """Override this method with the main contents of the script."""
+def get_arg_value(method, arg_name, args, kwargs):
+    """Get the value of the parameter with name arg_name.
 
+    method is assumed to have been called as method(*args, **kwargs).
 
-def _get_arg_value(method, arg_name, args, kwargs):
+    """
     if arg_name in kwargs:
         return kwargs[arg_name]
     else:
@@ -108,11 +80,24 @@ def experiment(arg_param=None):
     Returns
     -------
 
-    A decorator that adds logging and bookkeeping functionality to its
-    argument.
+    A decorator that adds bookkeeping functionality to its argument.
 
     """
     def _experiment(method):
+        """Decorator that adds bookkeeping functionality to its argument.
+
+        Parameters
+        ----------
+
+        method (function): A experimental computation function.
+
+        Returns
+        -------
+
+        The method function, with added logging and bookkeeping
+        functionality.
+
+        """
         exp_name = method.__name__
 
         def start_msg(param):
@@ -131,7 +116,7 @@ def experiment(arg_param=None):
 
         @functools.wraps(method)
         def decorated(*args, **kwargs):
-            value = _get_arg_value(method, arg_param, args, kwargs)
+            value = get_arg_value(method, arg_param, args, kwargs)
             logging.info(start_msg(value))
 
             start = time.time()
@@ -144,3 +129,20 @@ def experiment(arg_param=None):
         return decorated
 
     return _experiment
+
+
+def config_logging(time, script_name):
+    """Set the logging module configuration.
+
+    Parameters
+    ----------
+
+    time (datetime.datetime): the time at which the script was called.
+
+    script_name (str): the name of the script that decu is running.
+
+    """
+    logfile = '{}_{}.txt'.format(time, script_name)
+    logfile = os.path.join(os.getcwd(), LOGS_PATH, logfile)
+    logging.basicConfig(level=logging.INFO, filename=logfile,
+                        format=LOG_FMT, datefmt=TIME_FMT)
