@@ -13,6 +13,7 @@ import inspect
 import functools
 import numpy as np
 from multiprocessing import Pool
+import matplotlib.pyplot as plt
 
 __all__ = ['Script', 'experiment', 'run_parallel']
 
@@ -44,6 +45,13 @@ class Script():
         return os.path.join(self.working_dir, self.RESULTS_PATH,
                             '{}_{}_{}.txt'.format(self.start_time,
                                                   exp_name, param))
+
+    def make_figure_file(self, fig_name, suffix=None):
+        if suffix is None:
+            outfile = '{}_{}.png'.format(self.start_time, fig_name)
+        else:
+            outfile = '{}_{}_{}.png'.format(self.start_time, fig_name, suffix)
+        return os.path.join(self.working_dir, self.FIGURES_PATH, outfile)
 
 
 def run_parallel(exp, data, params):
@@ -137,7 +145,6 @@ def experiment(exp_param=None):
 
         def write_results(result, outfile):
             """Write experiment results to disk."""
-            print(outfile)
             np.savetxt(outfile, np.array(result))
 
         def wrote_results_msg(outfile, param):
@@ -147,7 +154,6 @@ def experiment(exp_param=None):
             else:
                 return 'Wrote results of experiment {} with param {} in file {}.'.format(
                     exp_name, param, outfile)
-
 
         @functools.wraps(method)
         def decorated(*args, **kwargs):
@@ -170,3 +176,62 @@ def experiment(exp_param=None):
         return decorated
 
     return _experiment
+
+
+
+def figure(show=False, save=True):
+    """Create the figure decorator.
+
+    Parameters
+    ----------
+
+    show (bool): Whether or not the figure should be shown.
+
+    save (bool): Whether or not the figure should be saved to disk.
+
+    Returns
+    -------
+
+    A decorator that adds figure logging functionality to its argument.
+
+    """
+    def _figure(method):
+        """Decorator that adds logging functionality to figure methods.
+
+        The method must return while the figure is still in memory, i.e.,
+        neither plt.show or plt.savefig must be called.
+
+        Parameters
+        ----------
+
+        show (bool): Whether or not the figure should be shown.
+
+        save (bool): Whether or not the figure should be saved to disk.
+
+        Returns
+        -------
+
+        The figure method, with added logging functionality.
+
+        """
+        fig_name = method.__name__
+
+        def wrote_fig_msg(outfile):
+            return 'Wrote figure {} to file {}.'.format(fig_name, outfile)
+
+        @functools.wraps(method)
+        def decorated(*args, suffix=None, **kwargs):
+            method(*args, **kwargs)
+            fig = plt.gcf()
+            if save:
+                obj = args[0]
+                outfile = obj.make_figure_file(fig_name, suffix)
+                fig.savefig(outfile)
+                logging.info(wrote_fig_msg(outfile))
+            if show:
+                plt.show()
+
+
+        return decorated
+
+    return _figure
