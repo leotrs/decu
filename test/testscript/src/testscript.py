@@ -6,33 +6,35 @@ This is a test script for decu.
 
 """
 
-from decu import *
+from decu import Script, experiment, run_parallel
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-@experiment(exp_param='param')
-def exp(data, param):
-    """Compute x**param for each data point."""
-    logging.info('Working hard..')
-    return np.array([np.power(x, param) for x in data])
+class TestSript(Script):
 
-# @figure
-def plot_results(data, result):
-    """Plot results of exp1."""
-    plt.figure()
-    for param in result.keys():
-        plt.plot(data, result[param])
-    plt.show()
+    @experiment(exp_param='param')
+    def exp(self, data, param):
+        """Compute x**param for each data point."""
+        logging.info('Working hard..')
+        return np.array([np.power(x, param) for x in data])
 
-def main():
-    """Run some experiments and make some figures."""
-    data = np.arange(5)
-    param_list1 = np.arange(5)
-    result1 = {p: exp(data, param=p) for p in param_list1}
-    plot_results(data, result1)
+    # @figure
+    def plot_results(self, data, result):
+        """Plot results of exp1."""
+        plt.figure()
+        for param in result.keys():
+            plt.plot(data, result[param])
+        plt.show()
 
-    param_list2 = np.arange(5, 10)
-    result2 = run_parallel(exp, data, param_list2)
-    plot_results(data, result2)
+    def main(self):
+        """Run some experiments and make some figures."""
+        data = np.arange(5)
+        param_list1 = np.arange(5)
+        result1 = {p: self.exp(data, param=p) for p in param_list1}
+        self.plot_results(data, result1)
+
+        param_list2 = np.arange(5, 10)
+        result2 = run_parallel(self.exp, data, param_list2)
+        self.plot_results(data, result2)

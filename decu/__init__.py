@@ -22,7 +22,23 @@ LOG_FMT = '[%(asctime)s]%(levelname)s: %(message)s'
 TIME_FMT = '%H:%M:%S'
 
 
-__all__ = ['experiment', 'run_parallel', 'config_logging']
+__all__ = ['Script', 'experiment', 'run_parallel']
+
+
+class Script():
+    """Base class for experimental computation scripts."""
+
+    def __init__(self, start_time, working_dir, file_name):
+        self.start_time = start_time
+        self.working_dir = working_dir
+        self.file_name = file_name
+        self.module_name, _ = os.path.splitext(file_name)
+
+        logfile = '{}_{}.txt'.format(start_time, self.module_name)
+        logfile = os.path.join(working_dir, LOGS_PATH, logfile)
+        logging.basicConfig(level=logging.INFO, filename=logfile,
+                            format=LOG_FMT, datefmt=TIME_FMT)
+        self.logfile = logfile
 
 
 def run_parallel(exp, data, params):
@@ -129,20 +145,3 @@ def experiment(exp_param=None):
         return decorated
 
     return _experiment
-
-
-def config_logging(time, script_name):
-    """Set the logging module configuration.
-
-    Parameters
-    ----------
-
-    time (datetime.datetime): the time at which the script was called.
-
-    script_name (str): the name of the script that decu is running.
-
-    """
-    logfile = '{}_{}.txt'.format(time, script_name)
-    logfile = os.path.join(os.getcwd(), LOGS_PATH, logfile)
-    logging.basicConfig(level=logging.INFO, filename=logfile,
-                        format=LOG_FMT, datefmt=TIME_FMT)
