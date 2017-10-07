@@ -27,7 +27,7 @@ def plot_results(data, result):
     plt.show()
 
 def main():
-    """Run exp1, exp2 and make the figures."""
+    """Run some experiments and make some figures."""
     data = np.arange(5)
     param_list1 = np.arange(5)
     result1 = {p: exp(data, param=p) for p in param_list1}

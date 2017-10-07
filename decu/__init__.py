@@ -100,30 +100,30 @@ def experiment(exp_param=None):
         """
         exp_name = method.__name__
 
-        def start_msg(param):
+        def exp_start_msg(param):
             if exp_param is None:
                 return 'Starting experiment {}..'.format(exp_name)
             else:
                 return 'Starting experiment {} with param {}..'.format(
                     exp_name, param)
 
-        def end_msg(param, time):
+        def exp_end_msg(param, elapsed):
             if exp_param is None:
                 return 'Finished experiment {}..'.format(exp_name)
             else:
                 return 'Finished experiment {} with param {}. Took {:.3f}s'.format(
-                    exp_name, param, time)
+                    exp_name, param, elapsed)
 
         @functools.wraps(method)
         def decorated(*args, **kwargs):
             value = get_argument(method, exp_param, args, kwargs)
-            logging.info(start_msg(value))
+            logging.info(exp_start_msg(value))
 
             start = time.time()
             result = method(*args, **kwargs)
             end = time.time()
 
-            logging.info(end_msg(value, end - start))
+            logging.info(exp_end_msg(value, end - start))
             return result
 
         return decorated
