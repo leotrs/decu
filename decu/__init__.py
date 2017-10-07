@@ -11,22 +11,22 @@ import time
 import logging
 import inspect
 import functools
+import numpy as np
 from multiprocessing import Pool
-
-
-DATA_PATH = 'data/'
-RESULTS_PATH = 'results/'
-FIGURES_PATH = 'pics/'
-LOGS_PATH = 'logs/'
-LOG_FMT = '[%(asctime)s]%(levelname)s: %(message)s'
-TIME_FMT = '%H:%M:%S'
-
 
 __all__ = ['Script', 'experiment', 'run_parallel']
 
 
 class Script():
     """Base class for experimental computation scripts."""
+
+    DATA_PATH = 'data/'
+    RESULTS_PATH = 'results/'
+    FIGURES_PATH = 'pics/'
+    LOGS_PATH = 'logs/'
+    LOG_FMT = '[%(asctime)s]%(levelname)s: %(message)s'
+    TIME_FMT = '%H:%M:%S'
+
 
     def __init__(self, start_time, working_dir, file_name):
         self.start_time = start_time
@@ -35,10 +35,15 @@ class Script():
         self.module_name, _ = os.path.splitext(file_name)
 
         logfile = '{}_{}.txt'.format(start_time, self.module_name)
-        logfile = os.path.join(working_dir, LOGS_PATH, logfile)
+        logfile = os.path.join(working_dir, self.LOGS_PATH, logfile)
         logging.basicConfig(level=logging.INFO, filename=logfile,
-                            format=LOG_FMT, datefmt=TIME_FMT)
+                            format=self.LOG_FMT, datefmt=self.TIME_FMT)
         self.logfile = logfile
+
+    def make_result_file(self, exp_name, param):
+        return os.path.join(self.working_dir, self.RESULTS_PATH,
+                            '{}_{}_{}.txt'.format(self.start_time,
+                                                  exp_name, param))
 
 
 def run_parallel(exp, data, params):
@@ -130,6 +135,20 @@ def experiment(exp_param=None):
                 return 'Finished experiment {} with param {}. Took {:.3f}s'.format(
                     exp_name, param, elapsed)
 
+        def write_results(result, outfile):
+            """Write experiment results to disk."""
+            print(outfile)
+            np.savetxt(outfile, np.array(result))
+
+        def wrote_results_msg(outfile, param):
+            if exp_param is None:
+                return 'Wrote results of experiment {} in file {}.'.format(
+                    exp_name, outfile)
+            else:
+                return 'Wrote results of experiment {} with param {} in file {}.'.format(
+                    exp_name, param, outfile)
+
+
         @functools.wraps(method)
         def decorated(*args, **kwargs):
             value = get_argument(method, exp_param, args, kwargs)
@@ -140,6 +159,12 @@ def experiment(exp_param=None):
             end = time.time()
 
             logging.info(exp_end_msg(value, end - start))
+
+            obj = args[0]
+            outfile = obj.make_result_file(exp_name, value)
+            write_results(result, outfile)
+            logging.info(wrote_results_msg(outfile, value))
+
             return result
 
         return decorated
