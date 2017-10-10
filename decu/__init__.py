@@ -42,7 +42,7 @@ class Script():
         self.logfile = logfile
 
     def make_result_file(self, exp_name, param):
-        return os.path.join(self.working_dir, self.RESULTS_PATH,
+        return os.path.join(self.RESULTS_PATH,
                             '{}_{}_{}.txt'.format(self.start_time,
                                                   exp_name, param))
 
@@ -51,7 +51,7 @@ class Script():
             outfile = '{}_{}.png'.format(self.start_time, fig_name)
         else:
             outfile = '{}_{}_{}.png'.format(self.start_time, fig_name, suffix)
-        return os.path.join(self.working_dir, self.FIGURES_PATH, outfile)
+        return os.path.join(self.FIGURES_PATH, outfile)
 
 
 def run_parallel(exp, data, params):
