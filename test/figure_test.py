@@ -8,21 +8,15 @@ Test the @figure decorator.
 
 import os
 import decu
+import util
 import pytest
 import datetime
 import matplotlib.pyplot as plt
 
 
-class MyTestScript(decu.Script):
-    def __init__(self, tmpdir):
-        self.LOGS_PATH = tmpdir.mkdir('logs').dirname
-        self.FIGURES_PATH = tmpdir.mkdir('pics').dirname
-        super().__init__(datetime.datetime.now(), os.getcwd(), __name__)
-
-
-def test_figure_save_false(tmpdir):
+def test_save_false(tmpdir):
     """Test the behavior of @figure when save=False."""
-    class TestSaveFalse(MyTestScript):
+    class TestSaveFalse(util.TestScript):
         @decu.figure(save=False)
         def plot(self):
             plt.figure()
@@ -36,9 +30,9 @@ def test_figure_save_false(tmpdir):
     assert fig_filename not in tmpdir.listdir()
 
 
-def test_figure_save_true(tmpdir):
+def test_save_true(tmpdir):
     """Test the behavior of @figure when save=True."""
-    class TestSaveTrue(MyTestScript):
+    class TestSaveTrue(util.TestScript):
         @decu.figure(save=True)
         def plot(self):
             plt.figure()
