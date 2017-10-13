@@ -9,7 +9,6 @@ Main decu executable.
 import os
 import sys
 import importlib
-import logging
 import decu
 from datetime import datetime
 NOW = datetime.now()
