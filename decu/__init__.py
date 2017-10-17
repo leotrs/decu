@@ -21,12 +21,12 @@ __all__ = ['Script', 'experiment', 'run_parallel']
 class Script():
     """Base class for experimental computation scripts."""
 
-    DATA_PATH = 'data/'
-    RESULTS_PATH = 'results/'
-    FIGURES_PATH = 'pics/'
-    LOGS_PATH = 'logs/'
-    LOG_FMT = '[%(asctime)s]%(levelname)s: %(message)s'
-    TIME_FMT = '%H:%M:%S'
+    data_path = 'data/'
+    results_path = 'results/'
+    figures_path = 'pics/'
+    logs_path = 'logs/'
+    log_fmt = '[%(asctime)s]%(levelname)s: %(message)s'
+    time_fmt = '%H:%M:%S'
 
 
     def __init__(self, start_time, working_dir, file_name):
@@ -36,13 +36,13 @@ class Script():
         self.module_name, _ = os.path.splitext(file_name)
 
         logfile = '{}_{}.txt'.format(start_time, self.module_name)
-        logfile = os.path.join(working_dir, self.LOGS_PATH, logfile)
+        logfile = os.path.join(working_dir, self.logs_path, logfile)
         logging.basicConfig(level=logging.INFO, filename=logfile,
-                            format=self.LOG_FMT, datefmt=self.TIME_FMT)
+                            format=self.log_fmt, datefmt=self.time_fmt)
         self.logfile = logfile
 
     def make_result_file(self, exp_name, param):
-        return os.path.join(self.RESULTS_PATH,
+        return os.path.join(self.results_path,
                             '{}_{}_{}.txt'.format(self.start_time,
                                                   exp_name, param))
 
@@ -51,7 +51,7 @@ class Script():
             outfile = '{}_{}.png'.format(self.start_time, fig_name)
         else:
             outfile = '{}_{}_{}.png'.format(self.start_time, fig_name, suffix)
-        return os.path.join(self.FIGURES_PATH, outfile)
+        return os.path.join(self.figures_path, outfile)
 
 
 def run_parallel(exp, data, params):
