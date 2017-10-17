@@ -13,6 +13,6 @@ import datetime
 class TestScript(decu.Script):
     """Script subclass used for testing purposes."""
     def __init__(self, tmpdir):
-        self.logs_path = tmpdir.mkdir('logs').dirname
-        self.figures_path = tmpdir.mkdir('pics').dirname
+        self.logs_dir = tmpdir.mkdir('logs').dirname
+        self.figures_dir = tmpdir.mkdir('pics').dirname
         super().__init__(datetime.datetime.now(), os.getcwd(), __name__)

@@ -12,22 +12,25 @@ import logging
 import inspect
 import functools
 import numpy as np
+import configparser
 from multiprocessing import Pool
 import matplotlib.pyplot as plt
 
 __all__ = ['Script', 'experiment', 'run_parallel']
 
+CONFIG = configparser.ConfigParser()
+CONFIG.read('/home/leo/code/decu/decu/config.ini')
 
 class Script():
     """Base class for experimental computation scripts."""
 
-    data_path = 'data/'
-    results_path = 'results/'
-    figures_path = 'pics/'
-    logs_path = 'logs/'
+    data_dir = CONFIG['Script']['data_dir']
+    results_dir = CONFIG['Script']['results_dir']
+    logs_dir = CONFIG['Script']['logs_dir']
+    figures_dir = CONFIG['Script']['figures_dir']
+    figure_fmt = CONFIG['Script']['figure_fmt']
     log_fmt = '[%(asctime)s]%(levelname)s: %(message)s'
     time_fmt = '%H:%M:%S'
-
 
     def __init__(self, start_time, working_dir, file_name):
         self.start_time = start_time
@@ -36,22 +39,24 @@ class Script():
         self.module_name, _ = os.path.splitext(file_name)
 
         logfile = '{}_{}.txt'.format(start_time, self.module_name)
-        logfile = os.path.join(working_dir, self.logs_path, logfile)
+        logfile = os.path.join(working_dir, self.logs_dir, logfile)
         logging.basicConfig(level=logging.INFO, filename=logfile,
                             format=self.log_fmt, datefmt=self.time_fmt)
         self.logfile = logfile
 
     def make_result_file(self, exp_name, param):
-        return os.path.join(self.results_path,
+        return os.path.join(self.results_dir,
                             '{}_{}_{}.txt'.format(self.start_time,
                                                   exp_name, param))
 
     def make_figure_file(self, fig_name, suffix=None):
         if suffix is None:
-            outfile = '{}_{}.png'.format(self.start_time, fig_name)
+            outfile = '{}_{}.{}'.format(self.start_time, fig_name,
+                                        self.figure_fmt)
         else:
-            outfile = '{}_{}_{}.png'.format(self.start_time, fig_name, suffix)
-        return os.path.join(self.figures_path, outfile)
+            outfile = '{}_{}_{}.{}'.format(self.start_time, fig_name,
+                                           suffix, self.figure_fmt)
+        return os.path.join(self.figures_dir, outfile)
 
 
 def run_parallel(exp, data, params):
@@ -138,7 +143,7 @@ def experiment(exp_param=None):
 
         def exp_end_msg(param, elapsed):
             if exp_param is None:
-                return 'Finished experiment {}..'.format(exp_name)
+                return 'Finished experiment {}. Took {:3fs}'.format(exp_name, elapsed)
             else:
                 return 'Finished experiment {} with param {}. Took {:.3f}s'.format(
                     exp_name, param, elapsed)
