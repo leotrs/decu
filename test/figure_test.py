@@ -44,3 +44,20 @@ def test_save_true(tmpdir):
     assert fig_filename not in tmpdir.listdir()
     script.plot()
     assert fig_filename in tmpdir.listdir()
+
+
+def test_suffix(tmpdir):
+    """Test the suffix argument of @figure."""
+    class TestSuffix(util.TestScript):
+        @decu.figure(save=True)
+        def plot(self):
+            plt.figure()
+            plt.plot(range(100), [x**2 for x in range(100)])
+
+    script = TestSuffix(tmpdir)
+    suffix = 'test_suffix'
+    fig_filename = script.make_figure_file('plot', suffix)
+
+    assert fig_filename not in tmpdir.listdir()
+    script.plot(suffix=suffix)
+    assert fig_filename in tmpdir.listdir()

@@ -199,7 +199,10 @@ def figure(show=False, save=True):
         """Decorator that adds logging functionality to figure methods.
 
         The method must return while the figure is still in memory, i.e.,
-        neither plt.show or plt.savefig must be called.
+        neither plt.show or plt.savefig must be called. The resulting
+        decorated method has a 'suffix' parameter that accepts a string
+        that will be appended to the output file name. The 'suffix'
+        parameter must be passed as a keyword argument.
 
         Parameters
         ----------
@@ -211,7 +214,8 @@ def figure(show=False, save=True):
         Returns
         -------
 
-        The figure method, with added logging functionality.
+        The figure method, with added logging functionality, and a new
+        'suffix' parameter.
 
         """
         fig_name = method.__name__
