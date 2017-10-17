@@ -18,8 +18,9 @@ import matplotlib.pyplot as plt
 
 __all__ = ['Script', 'experiment', 'run_parallel']
 
-CONFIG = configparser.ConfigParser()
+CONFIG = configparser.ConfigParser(interpolation=None)
 CONFIG.read('/home/leo/code/decu/decu/config.ini')
+
 
 class Script():
     """Base class for experimental computation scripts."""
@@ -29,8 +30,8 @@ class Script():
     logs_dir = CONFIG['Script']['logs_dir']
     figures_dir = CONFIG['Script']['figures_dir']
     figure_fmt = CONFIG['Script']['figure_fmt']
-    log_fmt = '[%(asctime)s]%(levelname)s: %(message)s'
-    time_fmt = '%H:%M:%S'
+    log_fmt = CONFIG['Script']['log_fmt']
+    time_fmt = CONFIG['Script']['time_fmt']
 
     def __init__(self, start_time, working_dir, file_name):
         self.start_time = start_time
@@ -136,16 +137,16 @@ def experiment(exp_param=None):
 
         def exp_start_msg(param):
             if exp_param is None:
-                return 'Starting experiment {}..'.format(exp_name)
+                return CONFIG['experiment']['start_wo_param'].format(exp_name)
             else:
-                return 'Starting experiment {} with param {}..'.format(
+                return CONFIG['experiment']['start_w_param'].format(
                     exp_name, param)
 
         def exp_end_msg(param, elapsed):
             if exp_param is None:
-                return 'Finished experiment {}. Took {:3fs}'.format(exp_name, elapsed)
+                return CONFIG['experiment']['end_wo_param'].format(exp_name, elapsed)
             else:
-                return 'Finished experiment {} with param {}. Took {:.3f}s'.format(
+                return CONFIG['experiment']['end_w_param'].format(
                     exp_name, param, elapsed)
 
         def write_results(result, outfile):
@@ -154,10 +155,10 @@ def experiment(exp_param=None):
 
         def wrote_results_msg(outfile, param):
             if exp_param is None:
-                return 'Wrote results of experiment {} in file {}.'.format(
+                return CONFIG['experiment']['wrote_wo_param'].format(
                     exp_name, outfile)
             else:
-                return 'Wrote results of experiment {} with param {} in file {}.'.format(
+                return CONFIG['experiment']['wrote_w_param'].format(
                     exp_name, param, outfile)
 
         @functools.wraps(method)
@@ -226,7 +227,7 @@ def figure(show=False, save=True):
         fig_name = method.__name__
 
         def wrote_fig_msg(outfile):
-            return 'Wrote figure {} to file {}.'.format(fig_name, outfile)
+            return CONFIG['figure']['wrote'].format(fig_name, outfile)
 
         @functools.wraps(method)
         def decorated(*args, suffix=None, **kwargs):
