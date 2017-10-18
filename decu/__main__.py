@@ -28,19 +28,49 @@ def extract_script_class(module):
             return obj
 
 
-def main():
-    """Execute the script passed as command line argument."""
-    from argparse import ArgumentParser
-    parser = ArgumentParser(description='Experimental computation utilities.')
-    parser.add_argument('file', help='the script to be run')
-    args = parser.parse_args()
-
-    module_path, module_file = os.path.split(args.file)
+def exec_script(path):
+    """Execute the main function inside a file."""
+    module_path, module_file = os.path.split(path)
     sys.path.append(make_absolute_path(module_path))
     module_name, _ = os.path.splitext(module_file)
     module = importlib.import_module(module_name)
     script = extract_script_class(module)(NOW, os.getcwd(), module_file)
     script.main()
+
+
+def init(path):
+    """Initialize the path for a decu project."""
+
+    print('tmpdir in __main__.init: {}'.format(path))
+
+
+    from os.path import join
+    import configparser
+    config = configparser.ConfigParser(interpolation=None)
+    config.read('/home/leo/code/decu/decu/config.ini')
+    mkdir = lambda name: os.makedirs(join(path, name), exist_ok=True)
+    mkdir(config['Script']['data_dir'])
+    mkdir(config['Script']['logs_dir'])
+    mkdir(config['Script']['results_dir'])
+    mkdir(config['Script']['figures_dir'])
+    print('Initialized empty decu project directory in {}'.format(path))
+
+
+def main():
+    """Execute the script passed as command line argument."""
+    from argparse import ArgumentParser, ArgumentError
+    parser = ArgumentParser(description='Experimental computation utilities.')
+    parser.add_argument('mode', choices=['init', 'exec'])
+    parser.add_argument('path', nargs='?', help='the script to be run')
+    args = parser.parse_args()
+
+    if args.mode == 'exec':
+        if args.path is None:
+            parser.error('path must be specified when using exec')
+        else:
+            exec_script(args.path)
+    elif args.mode == 'init':
+        init(os.getcwd())
 
 
 
