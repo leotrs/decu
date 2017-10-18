@@ -23,6 +23,7 @@ setup(
     description='Decu is a Experimental Computation Utility',
     long_description='',
     packages=find_packages(),
+    entry_points={'console_scripts': ['decu=decu.__main__:main']},
     zip_safe=False,
     include_package_data=True,
     platforms='any'
