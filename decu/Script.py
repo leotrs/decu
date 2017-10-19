@@ -17,7 +17,7 @@ config.read([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
              os.path.expanduser('~/.decu.cfg'),
              os.path.join(os.getcwd(), 'decu.cfg')])
 
-__all__ = ['Script', 'config', 'experiment', 'figure', 'run_parallel']
+__all__ = ['Script', 'config', 'experiment', 'figure', 'run_parallel', 'read_result']
 
 
 class Script():
@@ -108,6 +108,41 @@ def get_argument(method, param_name, args, kwargs):
         return args[index]
 
 
+def write_result(result, outfile):
+    """Write result to disk.
+
+    Chose writing method according to result's type.
+
+    """
+    import numpy
+    import pandas
+    _type = type(result)
+    if _type == numpy.ndarray:
+        numpy.savetxt(outfile, numpy.array(result))
+    elif _type == pandas.DataFrame:
+        result.to_csv(outfile)
+
+
+def read_result(infile):
+    """Read result from disk.
+
+    Chose reading method according to result's type.
+
+    """
+    import numpy
+    import pandas
+
+    _, ext = os.path.splitext(infile)
+    ext = ext.strip('.')
+
+    if ext == 'txt':
+        data = numpy.loadtxt(infile)
+    elif ext == 'csv':
+        data = pandas.read_csv(infile)
+
+    return data
+
+
 def experiment(exp_param=None):
     """Decorator that adds logging functionality to experiment methods.
 
@@ -152,11 +187,6 @@ def experiment(exp_param=None):
             return temp.safe_substitute(exp_name=exp_name, param=param,
                                         elapsed=round(elapsed, 5))
 
-        def write_results(result, outfile):
-            """Write experiment results to disk."""
-            import numpy as np
-            np.savetxt(outfile, np.array(result))
-
         def wrote_results_msg(outfile, param):
             temp = Template(cfg['wrote_wo_param'] if exp_param is None
                              else cfg['wrote_w_param'])
@@ -178,7 +208,7 @@ def experiment(exp_param=None):
             end = time()
             logging.info(exp_end_msg(value, end - start))
             outfile = obj.make_result_file(exp_name, value)
-            write_results(result, outfile)
+            write_result(result, outfile)
             logging.info(wrote_results_msg(outfile, value))
 
             return result
