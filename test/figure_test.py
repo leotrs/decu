@@ -7,7 +7,7 @@ Test the @figure decorator.
 """
 
 import os
-import decu
+from decu import figure
 import util
 import matplotlib.pyplot as plt
 
@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 def test_save_false(tmpdir):
     """Test the behavior of @figure when save=False."""
     class TestSaveFalse(util.TestScript):
-        @decu.figure(save=False)
+        @figure(save=False)
         def plot(self):
             plt.figure()
             plt.plot(range(100), [x**2 for x in range(100)])
@@ -31,7 +31,7 @@ def test_save_false(tmpdir):
 def test_save_true(tmpdir):
     """Test the behavior of @figure when save=True."""
     class TestSaveTrue(util.TestScript):
-        @decu.figure(save=True)
+        @figure(save=True)
         def plot(self):
             plt.figure()
             plt.plot(range(100), [x**2 for x in range(100)])
@@ -47,7 +47,7 @@ def test_save_true(tmpdir):
 def test_suffix(tmpdir):
     """Test the suffix argument of @figure."""
     class TestSuffix(util.TestScript):
-        @decu.figure(save=True)
+        @figure(save=True)
         def plot(self):
             plt.figure()
             plt.plot(range(100), [x**2 for x in range(100)])

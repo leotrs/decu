@@ -7,13 +7,13 @@ Testing utilities.
 """
 
 import os
-import decu
+from decu import Script, config
 
 
-class TestScript(decu.Script):
+class TestScript(Script):
     """Script subclass used for testing purposes."""
     def __init__(self, tmpdir):
-        cfg = decu.config['Script']
+        cfg = config['Script']
         self.logs_dir = tmpdir.mkdir(cfg['logs_dir']).dirname
         self.figures_dir = tmpdir.mkdir(cfg['figures_dir']).dirname
         self.results_dir = tmpdir.mkdir(cfg['results_dir']).dirname

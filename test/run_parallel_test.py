@@ -6,7 +6,7 @@ Test the run_parallel function.
 
 """
 
-import decu
+from decu import run_parallel
 import util
 
 class MyTestScript(util.TestScript):
@@ -19,6 +19,6 @@ def test_result_order(tmpdir):
     script = MyTestScript(tmpdir)
     data = 10
     params = range(10)
-    results = decu.run_parallel(script.experiment, data, params)
+    results = run_parallel(script.experiment, data, params)
 
     assert results == {p: script.experiment(data, p) for p in params}

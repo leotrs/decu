@@ -6,7 +6,7 @@ Test the @experiment decorator.
 
 """
 
-import decu
+from decu import experiment
 import util
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 def test_write(tmpdir):
     """Test that @experiment-decorated methods write their results to disk."""
     class TestWrite(util.TestScript):
-        @decu.experiment(exp_param='param')
+        @experiment(exp_param='param')
         def exp(self, data, param):
             return np.power(data, param)
 
