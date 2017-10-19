@@ -9,6 +9,7 @@ Main decu executable.
 import os
 import decu
 from importlib import import_module
+from string import Template
 
 
 def make_absolute_path(path):
@@ -65,17 +66,13 @@ def inspect(path, figure=None):
     module = import_module(script_name)
     _class = extract_script_class(module)
 
-    py_cmd = """import decu
-import numpy as np
-import {dir}.{script} as {script}
-script = {script}.{cls}('{cwd}', '{script}')
-result = np.loadtxt("{path}")
-""".format(dir=cfg['scripts_dir'].strip('/'), script=script_name,
-           cls=_class.__name__, cwd=os.getcwd(), path=path)
+    py_cmd = Template(decu.config['inspect']['py_cmd']).safe_substitute(
+        dir=cfg['scripts_dir'].strip('/'), script=script_name,
+        cls=_class.__name__, cwd=os.getcwd(), path=path)
 
     cli_cmd_opts = ['--no-banner']
     if figure is not None:
-        py_cmd += 'script.{}(np.arange(5), result)\n'.format(figure)
+        py_cmd += '\nscript.{}(np.arange(5), result)\n'.format(figure)
     else:
         cli_cmd_opts.append('-i')
 
