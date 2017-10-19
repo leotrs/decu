@@ -40,19 +40,12 @@ def exec_script(path):
 
 def init(path):
     """Initialize the path for a decu project."""
-
-    print('tmpdir in __main__.init: {}'.format(path))
-
-
     from os.path import join
-    import configparser
-    config = configparser.ConfigParser(interpolation=None)
-    config.read('/home/leo/code/decu/decu/config.ini')
     mkdir = lambda name: os.makedirs(join(path, name), exist_ok=True)
-    mkdir(config['Script']['data_dir'])
-    mkdir(config['Script']['logs_dir'])
-    mkdir(config['Script']['results_dir'])
-    mkdir(config['Script']['figures_dir'])
+    mkdir(decu.config['Script']['data_dir'])
+    mkdir(decu.config['Script']['logs_dir'])
+    mkdir(decu.config['Script']['results_dir'])
+    mkdir(decu.config['Script']['figures_dir'])
     print('Initialized empty decu project directory in {}'.format(path))
 
 
