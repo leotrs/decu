@@ -13,9 +13,9 @@ from string import Template
 from datetime import datetime
 from configparser import ConfigParser
 config = ConfigParser(interpolation=None)
-config.read(['decu.cfg',
+config.read([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
              os.path.expanduser('~/.decu.cfg'),
-             os.path.join(os.path.dirname(__file__), 'decu.cfg')])
+             os.path.join(os.getcwd(), 'decu.cfg')])
 
 __all__ = ['Script', 'config', 'experiment', 'figure', 'run_parallel']
 
