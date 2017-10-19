@@ -13,6 +13,7 @@ import inspect
 import functools
 import numpy as np
 import configparser
+from string import Template
 from multiprocessing import Pool
 import matplotlib.pyplot as plt
 
@@ -134,32 +135,28 @@ def experiment(exp_param=None):
 
         """
         exp_name = method.__name__
+        config = CONFIG['experiment']
 
         def exp_start_msg(param):
-            if exp_param is None:
-                return CONFIG['experiment']['start_wo_param'].format(exp_name)
-            else:
-                return CONFIG['experiment']['start_w_param'].format(
-                    exp_name, param)
+            temp = Template(config['start_wo_param'] if exp_param is None
+                            else config['start_w_param'])
+            return temp.safe_substitute(exp_name=exp_name, param=param)
 
         def exp_end_msg(param, elapsed):
-            if exp_param is None:
-                return CONFIG['experiment']['end_wo_param'].format(exp_name, elapsed)
-            else:
-                return CONFIG['experiment']['end_w_param'].format(
-                    exp_name, param, elapsed)
+            temp = Template(config['end_wo_param'] if exp_param is None
+                            else config['end_w_param'])
+            return temp.safe_substitute(exp_name=exp_name, param=param,
+                                        elapsed=round(elapsed, 5))
 
         def write_results(result, outfile):
             """Write experiment results to disk."""
             np.savetxt(outfile, np.array(result))
 
         def wrote_results_msg(outfile, param):
-            if exp_param is None:
-                return CONFIG['experiment']['wrote_wo_param'].format(
-                    exp_name, outfile)
-            else:
-                return CONFIG['experiment']['wrote_w_param'].format(
-                    exp_name, param, outfile)
+            temp = Template(config['wrote_wo_param'] if exp_param is None
+                            else config['wrote_w_param'])
+            return temp.safe_substitute(exp_name=exp_name, param=param,
+                                        outfile=outfile)
 
         @functools.wraps(method)
         def decorated(*args, **kwargs):
@@ -227,7 +224,8 @@ def figure(show=False, save=True):
         fig_name = method.__name__
 
         def wrote_fig_msg(outfile):
-            return CONFIG['figure']['wrote'].format(fig_name, outfile)
+            temp = Template(CONFIG['figure']['wrote'])
+            return temp.safe_substitute(fig_name=fig_name, outfile=outfile)
 
         @functools.wraps(method)
         def decorated(*args, suffix=None, **kwargs):
