@@ -1,18 +1,20 @@
 """
-main.py
+Script.py
 -------
 
-A library for experimental computation scripts.
+Main decu classes and decorators.
 
 """
 
-import os as _os
-import logging as _logging
-from functools import wraps as _wraps
-from string import Template as _Template
-from configparser import ConfigParser as _cp
-config = _cp(interpolation=None)
-config.read('/home/leo/code/decu/decu/config.ini')
+import os
+import logging
+from functools import wraps
+from string import Template
+from configparser import ConfigParser
+config = ConfigParser(interpolation=None)
+config.read(['decu.cfg',
+             os.path.expanduser('~/.decu.cfg'),
+             os.path.join(os.path.dirname(__file__), 'decu.cfg')])
 
 __all__ = ['Script', 'config', 'experiment', 'figure', 'run_parallel']
 
@@ -32,16 +34,16 @@ class Script():
         self.start_time = start_time
         self.working_dir = working_dir
         self.file_name = file_name
-        self.module_name, _ = _os.path.splitext(file_name)
+        self.module_name, _ = os.path.splitext(file_name)
 
         logfile = '{}_{}.txt'.format(start_time, self.module_name)
-        logfile = _os.path.join(working_dir, self.logs_dir, logfile)
-        _logging.basicConfig(level=_logging.INFO, filename=logfile,
+        logfile = os.path.join(working_dir, self.logs_dir, logfile)
+        logging.basicConfig(level=logging.INFO, filename=logfile,
                             format=self.log_fmt, datefmt=self.time_fmt)
         self.logfile = logfile
 
     def make_result_file(self, exp_name, param):
-        return _os.path.join(self.results_dir,
+        return os.path.join(self.results_dir,
                             '{}_{}_{}.txt'.format(self.start_time,
                                                   exp_name, param))
 
@@ -52,7 +54,7 @@ class Script():
         else:
             outfile = '{}_{}_{}.{}'.format(self.start_time, fig_name,
                                            suffix, self.figure_fmt)
-        return _os.path.join(self.figures_dir, outfile)
+        return os.path.join(self.figures_dir, outfile)
 
 
 def run_parallel(exp, data, params):
@@ -134,12 +136,12 @@ def experiment(exp_param=None):
         cfg = config['experiment']
 
         def exp_start_msg(param):
-            temp = _Template(cfg['start_wo_param'] if exp_param is None
+            temp = Template(cfg['start_wo_param'] if exp_param is None
                              else cfg['start_w_param'])
             return temp.safe_substitute(exp_name=exp_name, param=param)
 
         def exp_end_msg(param, elapsed):
-            temp = _Template(cfg['end_wo_param'] if exp_param is None
+            temp = Template(cfg['end_wo_param'] if exp_param is None
                              else cfg['end_w_param'])
             return temp.safe_substitute(exp_name=exp_name, param=param,
                                         elapsed=round(elapsed, 5))
@@ -150,27 +152,27 @@ def experiment(exp_param=None):
             np.savetxt(outfile, np.array(result))
 
         def wrote_results_msg(outfile, param):
-            temp = _Template(cfg['wrote_wo_param'] if exp_param is None
+            temp = Template(cfg['wrote_wo_param'] if exp_param is None
                              else cfg['wrote_w_param'])
             return temp.safe_substitute(exp_name=exp_name, param=param,
                                         outfile=outfile)
 
         from time import time
-        @_wraps(method)
+        @wraps(method)
         def decorated(*args, **kwargs):
             value = get_argument(method, exp_param, args, kwargs)
-            _logging.info(exp_start_msg(value))
+            logging.info(exp_start_msg(value))
 
             start = time()
             result = method(*args, **kwargs)
             end = time()
 
-            _logging.info(exp_end_msg(value, end - start))
+            logging.info(exp_end_msg(value, end - start))
 
             obj = args[0]
             outfile = obj.make_result_file(exp_name, value)
             write_results(result, outfile)
-            _logging.info(wrote_results_msg(outfile, value))
+            logging.info(wrote_results_msg(outfile, value))
 
             return result
 
@@ -222,11 +224,11 @@ def figure(show=False, save=True):
         fig_name = method.__name__
 
         def wrote_fig_msg(outfile):
-            temp = _Template(config['figure']['wrote'])
+            temp = Template(config['figure']['wrote'])
             return temp.safe_substitute(fig_name=fig_name, outfile=outfile)
 
         import matplotlib.pyplot as plt
-        @_wraps(method)
+        @wraps(method)
         def decorated(*args, suffix=None, **kwargs):
             method(*args, **kwargs)
             fig = plt.gcf()
@@ -234,7 +236,7 @@ def figure(show=False, save=True):
                 obj = args[0]
                 outfile = obj.make_figure_file(fig_name, suffix)
                 fig.savefig(outfile)
-                _logging.info(wrote_fig_msg(outfile))
+                logging.info(wrote_fig_msg(outfile))
             if show:
                 plt.show()
 
