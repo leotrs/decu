@@ -38,6 +38,7 @@ class Script():
         self.file_name = file_name
         self.module_name, _ = os.path.splitext(file_name)
 
+        os.makedirs(self.logs_dir, exist_ok=True)
         logfile = Template(config['Script']['log_file']).safe_substitute(
             time=self.start_time, module_name=self.module_name)
         logfile = os.path.join(working_dir, self.logs_dir, logfile)
@@ -165,16 +166,17 @@ def experiment(exp_param=None):
         from time import time
         @wraps(method)
         def decorated(*args, **kwargs):
+            obj = args[0]
+            # Make sure the output dir exists
+            os.makedirs(obj.results_dir, exist_ok=True)
+
             value = get_argument(method, exp_param, args, kwargs)
             logging.info(exp_start_msg(value))
 
             start = time()
             result = method(*args, **kwargs)
             end = time()
-
             logging.info(exp_end_msg(value, end - start))
-
-            obj = args[0]
             outfile = obj.make_result_file(exp_name, value)
             write_results(result, outfile)
             logging.info(wrote_results_msg(outfile, value))
@@ -235,10 +237,14 @@ def figure(show=False, save=True):
         import matplotlib.pyplot as plt
         @wraps(method)
         def decorated(*args, suffix=None, **kwargs):
+            obj = args[0]
+            # Make sure the output dir exists
+            os.makedirs(obj.figures_dir, exist_ok=True)
+
             method(*args, **kwargs)
             fig = plt.gcf()
             if save:
-                obj = args[0]
+
                 outfile = obj.make_figure_file(fig_name, suffix)
                 fig.savefig(outfile)
                 logging.info(wrote_fig_msg(outfile))
