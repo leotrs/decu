@@ -6,9 +6,10 @@ Test the @experiment decorator.
 
 """
 
-from decu import experiment
+import os
 import util
 import numpy as np
+from decu import experiment
 import matplotlib.pyplot as plt
 
 
@@ -21,8 +22,8 @@ def test_write(tmpdir):
 
     script = TestWrite(tmpdir)
     pval = 4
-    result_filename = script.make_result_file('exp', pval)
+    result_filename = os.path.basename(script.make_result_file('exp', pval))
 
-    assert result_filename not in tmpdir.listdir()
+    assert result_filename not in os.listdir(script.results_dir)
     script.exp(range(100), pval)
-    assert result_filename in tmpdir.listdir()
+    assert result_filename in os.listdir(script.results_dir)
