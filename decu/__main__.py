@@ -48,16 +48,19 @@ def init(path):
     print('Initialized empty decu project directory in {}'.format(path))
 
 
-def inspect(path):
+def inspect(path, figure=None):
     """Load a result file and go into ipython."""
-    cfg = decu.config['Script']
     import re
+    import sys
+    from tempfile import NamedTemporaryFile
+    from subprocess import call
+
+    cfg = decu.config['Script']
     _, filename = os.path.split(path)
     search = re.sub(r'\$\{.*?\}', '(.*?)', re.sub('\.', '\.', cfg['result_file']))
     search = r'^{}$'.format(search)
     script_name = re.match(search, filename).group(2)
 
-    import sys
     sys.path.append(cfg['scripts_dir'])
     module = import_module(script_name)
     _class = extract_script_class(module)
@@ -66,16 +69,21 @@ def inspect(path):
 import numpy as np
 import {dir}.{script} as {script}
 script = {script}.{cls}('{cwd}', '{script}')
-results = np.loadtxt("{path}")
+result = np.loadtxt("{path}")
 """.format(dir=cfg['scripts_dir'].strip('/'), script=script_name,
            cls=_class.__name__, cwd=os.getcwd(), path=path)
+
+    cli_cmd_opts = ['--no-banner']
+    if figure is not None:
+        py_cmd += 'script.{}(np.arange(5), result)\n'.format(figure)
+    else:
+        cli_cmd_opts.append('-i')
+
     print(py_cmd)
-    from tempfile import NamedTemporaryFile
-    from subprocess import call
     with NamedTemporaryFile('w+') as tmp:
         tmp.write(py_cmd)
         tmp.read()
-        cli_cmd = ['ipython', '--no-banner', tmp.name, '-i']
+        cli_cmd = ['ipython', tmp.name] + cli_cmd_opts
         call(cli_cmd)
 
 
@@ -85,6 +93,8 @@ def main():
     parser = ArgumentParser(description='Experimental computation utilities.')
     parser.add_argument('mode', choices=['init', 'exec', 'inspect'])
     parser.add_argument('path', nargs='?', help='the script to be run')
+    parser.add_argument('-p', '--plot', help='if using inspect, the '
+                        '@figure method to call on the inspected result')
     args = parser.parse_args()
 
     if args.mode == 'exec':
@@ -98,7 +108,7 @@ def main():
         if args.path is None:
             parser.error('path must be specified when using inspect')
         else:
-            inspect(args.path)
+            inspect(args.path, figure=args.plot)
 
 
 if __name__ == "__main__":

@@ -25,15 +25,13 @@ def test_init(tmpdir):
 
 def test_exec_no_arg():
     """Test that `decu exec` without an argument gives an error."""
-    # Error code 2 means 'misuse of shell built-ins' and is the code that
-    # argparse gives in case there's an parsing error.
     with pytest.raises(CalledProcessError):
         check_call(['decu', 'exec'])
 
 
 def test_inspect_no_arg():
-    """Test that `decu inspect` without an argument gives an error."""
-    # Error code 2 means 'misuse of shell built-ins' and is the code that
-    # argparse gives in case there's an parsing error.
+    """Test that `decu inspect` with wrong arguments gives an error."""
     with pytest.raises(CalledProcessError):
         check_call(['decu', 'inspect'])
+    with pytest.raises(CalledProcessError):
+        check_call(['decu', 'inspect', 'testscript/src/testscript.py', '--plot'])
