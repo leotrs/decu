@@ -37,24 +37,27 @@ class Script():
         self.file_name = file_name
         self.module_name, _ = os.path.splitext(file_name)
 
-        logfile = '{}_{}.txt'.format(self.start_time, self.module_name)
+        logfile = Template(config['Script']['log_file']).safe_substitute(
+            time=self.start_time, module_name=self.module_name)
         logfile = os.path.join(working_dir, self.logs_dir, logfile)
         logging.basicConfig(level=logging.INFO, filename=logfile,
                             format=self.log_fmt, datefmt=self.time_fmt)
         self.logfile = logfile
 
-    def make_result_file(self, exp_name, param):
+    def make_result_file(self, exp_name, param, ext='txt'):
+        temp = Template(config['Script']['result_file'])
         return os.path.join(self.results_dir,
-                            '{}_{}_{}.txt'.format(self.start_time,
-                                                  exp_name, param))
+                            temp.safe_substitute(time=self.start_time,
+                                                 module_name=self.module_name,
+                                                 exp_name=exp_name, param=param, ext=ext))
 
     def make_figure_file(self, fig_name, suffix=None):
-        if suffix is None:
-            outfile = '{}_{}.{}'.format(self.start_time, fig_name,
-                                        self.figure_fmt)
-        else:
-            outfile = '{}_{}_{}.{}'.format(self.start_time, fig_name,
-                                           suffix, self.figure_fmt)
+        temp = Template(config['Script']['figure_file_wo_suffix'] if suffix is None else
+                        config['Script']['figure_file_w_suffix'])
+        outfile = temp.safe_substitute(time=self.start_time,
+                                       module_name=self.module_name,
+                                       fig_name=fig_name, suffix=suffix,
+                                       ext=self.figure_fmt)
         return os.path.join(self.figures_dir, outfile)
 
 
