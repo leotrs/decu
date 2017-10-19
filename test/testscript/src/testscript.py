@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-class TestSript(Script):
+class TestScript(Script):
 
     @experiment(exp_param='param')
     def exp(self, data, param):
