@@ -8,6 +8,7 @@ Main decu executable.
 
 import os
 import decu
+from importlib import import_module
 
 
 def make_absolute_path(path):
@@ -27,7 +28,6 @@ def extract_script_class(module):
 def exec_script(path):
     """Execute the main function inside a file."""
     import sys
-    from importlib import import_module
     module_path, module_file = os.path.split(path)
     sys.path.append(make_absolute_path(module_path))
     module_name, _ = os.path.splitext(module_file)
@@ -49,11 +49,33 @@ def init(path):
 
 def inspect(path):
     """Load a result file and go into ipython."""
+    cfg = decu.config['Script']
+    import re
+    _, filename = os.path.split(path)
+    search = re.sub(r'\$\{.*?\}', '(.*?)', re.sub('\.', '\.', cfg['result_file']))
+    search = r'^{}$'.format(search)
+    script_name = re.match(search, filename).group(2)
+
+    import sys
+    sys.path.append(cfg['scripts_dir'])
+    module = import_module(script_name)
+    _class = extract_script_class(module)
+
+    py_cmd = """import decu
+import numpy as np
+import {dir}.{script} as {script}
+script = {script}.{cls}('{cwd}', '{script}')
+results = np.loadtxt("{path}")
+""".format(dir=cfg['scripts_dir'].strip('/'), script=script_name,
+           cls=_class.__name__, cwd=os.getcwd(), path=path)
+    print(py_cmd)
+    from tempfile import NamedTemporaryFile
     from subprocess import call
-    py_cmd = 'import decu;import numpy as np;results = np.loadtxt("{}")'.format(path)
-    cli_cmd = ['ipython', '-i', '--no-banner', '-c', '\'{}\''.format(py_cmd)]
-    print(py_cmd.replace(';', '\n'))
-    call(cli_cmd)
+    with NamedTemporaryFile('w+') as tmp:
+        tmp.write(py_cmd)
+        tmp.read()
+        cli_cmd = ['ipython', '--no-banner', tmp.name, '-i']
+        call(cli_cmd)
 
 
 def main():
