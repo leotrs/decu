@@ -10,6 +10,7 @@ import os
 import logging
 from functools import wraps
 from string import Template
+from datetime import datetime
 from configparser import ConfigParser
 config = ConfigParser(interpolation=None)
 config.read(['decu.cfg',
@@ -30,13 +31,13 @@ class Script():
     log_fmt = config['Script']['log_fmt']
     time_fmt = config['Script']['time_fmt']
 
-    def __init__(self, start_time, working_dir, file_name):
-        self.start_time = start_time
+    def __init__(self, working_dir, file_name):
+        self.start_time = datetime.now()
         self.working_dir = working_dir
         self.file_name = file_name
         self.module_name, _ = os.path.splitext(file_name)
 
-        logfile = '{}_{}.txt'.format(start_time, self.module_name)
+        logfile = '{}_{}.txt'.format(self.start_time, self.module_name)
         logfile = os.path.join(working_dir, self.logs_dir, logfile)
         logging.basicConfig(level=logging.INFO, filename=logfile,
                             format=self.log_fmt, datefmt=self.time_fmt)

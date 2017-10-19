@@ -8,8 +8,6 @@ Main decu executable.
 
 import os
 import decu
-from datetime import datetime
-NOW = datetime.now()
 
 
 def make_absolute_path(path):
@@ -34,7 +32,7 @@ def exec_script(path):
     sys.path.append(make_absolute_path(module_path))
     module_name, _ = os.path.splitext(module_file)
     module = import_module(module_name)
-    script = extract_script_class(module)(NOW, os.getcwd(), module_file)
+    script = extract_script_class(module)(os.getcwd(), module_file)
     script.main()
 
 
