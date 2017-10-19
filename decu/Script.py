@@ -12,6 +12,7 @@ from functools import wraps
 from string import Template
 from datetime import datetime
 from configparser import ConfigParser
+from multiprocessing import Pool, Value, Lock
 config = ConfigParser(interpolation=None)
 config.read([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
              os.path.expanduser('~/.decu.cfg'),
@@ -19,6 +20,8 @@ config.read([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
 
 __all__ = ['Script', 'config', 'experiment', 'figure', 'run_parallel', 'read_result']
 
+lock = Lock()
+runs = Value('i', 0)
 
 class Script():
     """Base class for experimental computation scripts."""
@@ -88,8 +91,11 @@ def run_parallel(exp, data, params):
     exp(data, pi).
 
     """
-    from multiprocessing import Pool
-    with Pool(maxtasksperchild=100) as pool:
+    def init(*args):
+        global lock, runs
+        lock, runs = args
+
+    with Pool(initializer=init, initargs=(lock, runs), maxtasksperchild=100) as pool:
         results = pool.starmap(exp, [(data, p) for p in params])
     return {p: results[i] for i, p in enumerate(params)}
 
@@ -176,40 +182,43 @@ def experiment(exp_param=None):
         exp_name = method.__name__
         cfg = config['experiment']
 
-        def exp_start_msg(param):
-            temp = Template(cfg['start_wo_param'] if exp_param is None
-                             else cfg['start_w_param'])
-            return temp.safe_substitute(exp_name=exp_name, param=param)
+        def exp_start_msg(run, param):
+            temp = Template(cfg['start_msg'])
+            return temp.safe_substitute(exp_name=exp_name, run=run, param=param)
 
-        def exp_end_msg(param, elapsed):
-            temp = Template(cfg['end_wo_param'] if exp_param is None
-                             else cfg['end_w_param'])
+        def exp_end_msg(run, param, elapsed):
+            temp = Template(cfg['end_msg'])
             return temp.safe_substitute(exp_name=exp_name, param=param,
-                                        elapsed=round(elapsed, 5))
+                                        elapsed=round(elapsed, 5), run=run)
 
-        def wrote_results_msg(outfile, param):
-            temp = Template(cfg['wrote_wo_param'] if exp_param is None
-                             else cfg['wrote_w_param'])
+        def wrote_results_msg(run, outfile, param):
+            temp = Template(cfg['write_msg'])
             return temp.safe_substitute(exp_name=exp_name, param=param,
-                                        outfile=outfile)
+                                        outfile=outfile, run=run)
 
         from time import time
         @wraps(method)
         def decorated(*args, **kwargs):
             obj = args[0]
+            with lock:
+                this_run = runs.value
+                decorated.run = runs.value
+                runs.value += 1
+
             # Make sure the output dir exists
             os.makedirs(obj.results_dir, exist_ok=True)
 
             value = get_argument(method, exp_param, args, kwargs)
-            logging.info(exp_start_msg(value))
+            logging.info(exp_start_msg(this_run, value))
 
             start = time()
             result = method(*args, **kwargs)
             end = time()
-            logging.info(exp_end_msg(value, end - start))
-            outfile = obj.make_result_file(exp_name, value)
+            logging.info(exp_end_msg(this_run, value, end - start))
+            outfile = obj.make_result_file(exp_name)
+            outfile = Template(outfile).safe_substitute(run=this_run)
             write_result(result, outfile)
-            logging.info(wrote_results_msg(outfile, value))
+            logging.info(wrote_results_msg(this_run, outfile, value))
 
             return result
 
@@ -274,7 +283,6 @@ def figure(show=False, save=True):
             method(*args, **kwargs)
             fig = plt.gcf()
             if save:
-
                 outfile = obj.make_figure_file(fig_name, suffix)
                 fig.savefig(outfile)
                 logging.info(wrote_fig_msg(outfile))

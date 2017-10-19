@@ -17,7 +17,7 @@ class TestScript(Script):
     @experiment(exp_param='param')
     def exp(self, data, param):
         """Compute x**param for each data point."""
-        logging.info('Working hard for {}..'.format(param))
+        logging.info('Working hard for {}..'.format(TestScript.exp.run))
         return np.power(data, param)
 
     @figure()
