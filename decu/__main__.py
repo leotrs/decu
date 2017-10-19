@@ -44,6 +44,7 @@ def init(path):
     mkdir(decu.config['Script']['logs_dir'])
     mkdir(decu.config['Script']['results_dir'])
     mkdir(decu.config['Script']['figures_dir'])
+    mkdir(decu.config['Script']['scripts_dir'])
     print('Initialized empty decu project directory in {}'.format(path))
 
 
