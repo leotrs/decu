@@ -9,8 +9,6 @@ Test the @figure decorator.
 import os
 import decu
 import util
-import pytest
-import datetime
 import matplotlib.pyplot as plt
 
 
