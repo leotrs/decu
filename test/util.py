@@ -18,4 +18,5 @@ class TestScript(Script):
         self.figures_dir = str(tmpdir.mkdir(cfg['figures_dir']))
         self.results_dir = str(tmpdir.mkdir(cfg['results_dir']))
         self.scripts_dir = str(tmpdir.mkdir(cfg['scripts_dir']))
+        self.gendata_dir = str(tmpdir.mkdir(cfg['gendata_dir']))
         super().__init__(os.getcwd(), __name__)

@@ -32,6 +32,7 @@ class Script():
     logs_dir = config['Script']['logs_dir']
     figures_dir = config['Script']['figures_dir']
     scripts_dir = config['Script']['scripts_dir']
+    gendata_dir = config['Script']['gendata_dir']
     figure_fmt = config['Script']['figure_fmt']
     log_fmt = config['Script']['log_fmt']
     time_fmt = config['Script']['time_fmt']
