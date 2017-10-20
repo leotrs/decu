@@ -346,11 +346,11 @@ import decu
 import numpy as np
 import src.script as script
 script = script.MyScript('root_dir', 'script')
-# loaded files in variable results
+# loaded files in variable result
 
 In [1]: data = range(100)
 
-In [2]: script.fig(data, results)
+In [2]: script.fig(data, result)
 
 In [2]: exit
 ```
@@ -373,7 +373,7 @@ In [2]: exit
 
 And the final result is:
 
-![decu is awesome](_static/xxx.png "decu is wonderful")
+![decu is awesome](_static/fig_file2.png "decu is wonderful")
 
 
 
