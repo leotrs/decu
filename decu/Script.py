@@ -273,7 +273,7 @@ def figure(show=False, save=True):
         fig_name = method.__name__
 
         def wrote_fig_msg(outfile):
-            temp = Template(config['figure']['wrote'])
+            temp = Template(config['figure']['write'])
             return temp.safe_substitute(fig_name=fig_name, outfile=outfile)
 
         import matplotlib.pyplot as plt
