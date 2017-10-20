@@ -1,6 +1,6 @@
 """
 Script.py
--------
+---------
 
 Main decu classes and decorators.
 
@@ -71,24 +71,16 @@ class Script():
 def run_parallel(exp, params):
     """Run an experiment in parallel.
 
-    For each element p in params, call exp(*p). These calls are made in
-    parallel using multiprocessing.
+    For each element `p` in `params`, call `exp(*p)`. These calls are made
+    in parallel using multiprocessing.
 
-    Parameters
-    ----------
+    Args:
+        exp (method): A @experiment-decorated method.
+        params (list): Each element is a set of arguments to call `exp` with.
 
-    exp (method): a method of this class that has been decoreted with
-    @experiment.
-
-    params (list of lists): each element is a set of arguments to call exp
-    with.
-
-    Returns
-    -------
-
-    A dictionary of the form {p1: result1, p2: result2, ...} where the pi
-    are the elements of params and resulti is the result of calling
-    exp(*pi).
+    Returns:
+        dict: A dictionary where the key `pi` is an element of `params` and
+        the value is the result of calling `exp(*pi)`.
 
     """
     def init(*args):
@@ -156,17 +148,14 @@ def read_result(infile):
 def experiment(data_param=None):
     """Decorator that adds logging functionality to experiment methods.
 
-    Parameters
-    ----------
+    Args:
 
-    data_param (str): The name of the parameter that is treated by the
-    method as data input. All other parameters are treated as experimental
-    parameters.
+        data_param (str): Parameter treated by the method as data
+    input. All other parameters are treated as experimental parameters.
 
-    Returns
-    -------
-
-    A decorator that adds bookkeeping functionality to its argument.
+    Returns:
+        func: A decorator that adds bookkeeping functionality to its
+        argument.
 
     """
     def _experiment(method):
@@ -234,17 +223,13 @@ def experiment(data_param=None):
 def figure(show=False, save=True):
     """Create the figure decorator.
 
-    Parameters
-    ----------
+    Args:
+        show (bool): Whether or not the figure should be shown.
+        save (bool): Whether or not the figure should be saved to disk.
 
-    show (bool): Whether or not the figure should be shown.
-
-    save (bool): Whether or not the figure should be saved to disk.
-
-    Returns
-    -------
-
-    A decorator that adds figure logging functionality to its argument.
+    Returns:
+        func: A decorator that adds figure logging functionality to its
+        argument.
 
     """
     def _figure(method):

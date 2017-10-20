@@ -1,0 +1,508 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>decu.Script &mdash; decu 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="decu 0.0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> decu
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../decu.html">decu package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">decu</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>decu.Script</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for decu.Script</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Script.py</span>
+<span class="sd">---------</span>
+
+<span class="sd">Main decu classes and decorators.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">string</span> <span class="k">import</span> <span class="n">Template</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">configparser</span> <span class="k">import</span> <span class="n">ConfigParser</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Pool</span><span class="p">,</span> <span class="n">Value</span><span class="p">,</span> <span class="n">Lock</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="p">(</span><span class="n">interpolation</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">config</span><span class="o">.</span><span class="n">read</span><span class="p">([</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;decu.cfg&#39;</span><span class="p">),</span>
+             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~/.decu.cfg&#39;</span><span class="p">),</span>
+             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s1">&#39;decu.cfg&#39;</span><span class="p">)])</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">,</span> <span class="s1">&#39;config&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="s1">&#39;figure&#39;</span><span class="p">,</span> <span class="s1">&#39;run_parallel&#39;</span><span class="p">,</span> <span class="s1">&#39;read_result&#39;</span><span class="p">]</span>
+
+<span class="n">lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+<span class="n">runs</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">Value</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Script"><a class="viewcode-back" href="../../decu.html#decu.Script.Script">[docs]</a><span class="k">class</span> <span class="nc">Script</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Base class for experimental computation scripts.&quot;&quot;&quot;</span>
+
+    <span class="n">data_dir</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">][</span><span class="s1">&#39;data_dir&#39;</span><span class="p">]</span>
+    <span class="n">results_dir</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">][</span><span class="s1">&#39;results_dir&#39;</span><span class="p">]</span>
+    <span class="n">logs_dir</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">][</span><span class="s1">&#39;logs_dir&#39;</span><span class="p">]</span>
+    <span class="n">figures_dir</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">][</span><span class="s1">&#39;figures_dir&#39;</span><span class="p">]</span>
+    <span class="n">scripts_dir</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">][</span><span class="s1">&#39;scripts_dir&#39;</span><span class="p">]</span>
+    <span class="n">figure_fmt</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">][</span><span class="s1">&#39;figure_fmt&#39;</span><span class="p">]</span>
+    <span class="n">log_fmt</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">][</span><span class="s1">&#39;log_fmt&#39;</span><span class="p">]</span>
+    <span class="n">time_fmt</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">][</span><span class="s1">&#39;time_fmt&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">working_dir</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">working_dir</span> <span class="o">=</span> <span class="n">working_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="n">file_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logs_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">logfile</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">][</span><span class="s1">&#39;log_file&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span>
+            <span class="n">time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">module_name</span><span class="p">)</span>
+        <span class="n">logfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">working_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logs_dir</span><span class="p">,</span> <span class="n">logfile</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">logfile</span><span class="p">,</span>
+                            <span class="nb">format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_fmt</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time_fmt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logfile</span> <span class="o">=</span> <span class="n">logfile</span>
+
+<div class="viewcode-block" id="Script.make_result_file"><a class="viewcode-back" href="../../decu.html#decu.Script.Script.make_result_file">[docs]</a>    <span class="k">def</span> <span class="nf">make_result_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exp_name</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s1">&#39;txt&#39;</span><span class="p">):</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">][</span><span class="s1">&#39;result_file&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_dir</span><span class="p">,</span>
+                            <span class="n">temp</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">,</span>
+                                                 <span class="n">module_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span>
+                                                 <span class="n">exp_name</span><span class="o">=</span><span class="n">exp_name</span><span class="p">,</span> <span class="n">run</span><span class="o">=</span><span class="n">run</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="n">ext</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Script.make_figure_file"><a class="viewcode-back" href="../../decu.html#decu.Script.Script.make_figure_file">[docs]</a>    <span class="k">def</span> <span class="nf">make_figure_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig_name</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">][</span><span class="s1">&#39;figure_file_wo_suffix&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">suffix</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span>
+                        <span class="n">config</span><span class="p">[</span><span class="s1">&#39;Script&#39;</span><span class="p">][</span><span class="s1">&#39;figure_file_w_suffix&#39;</span><span class="p">])</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">,</span>
+                                       <span class="n">module_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">module_name</span><span class="p">,</span>
+                                       <span class="n">fig_name</span><span class="o">=</span><span class="n">fig_name</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span>
+                                       <span class="n">ext</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">figure_fmt</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">figures_dir</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="run_parallel"><a class="viewcode-back" href="../../decu.html#decu.Script.run_parallel">[docs]</a><span class="k">def</span> <span class="nf">run_parallel</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Run an experiment in parallel.</span>
+
+<span class="sd">    For each element `p` in `params`, call `exp(*p)`. These calls are made</span>
+<span class="sd">    in parallel using multiprocessing.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exp (method): A @experiment-decorated method.</span>
+<span class="sd">        params (list): Each element is a set of arguments to call `exp` with.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary where the key `pi` is an element of `params` and</span>
+<span class="sd">        the value is the result of calling `exp(*pi)`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">lock</span><span class="p">,</span> <span class="n">runs</span>
+        <span class="n">lock</span><span class="p">,</span> <span class="n">runs</span> <span class="o">=</span> <span class="n">args</span>
+
+    <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">initializer</span><span class="o">=</span><span class="n">init</span><span class="p">,</span> <span class="n">initargs</span><span class="o">=</span><span class="p">(</span><span class="n">lock</span><span class="p">,</span> <span class="n">runs</span><span class="p">),</span> <span class="n">maxtasksperchild</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">starmap</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+<span class="k">def</span> <span class="nf">get_parameters</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the arguments passed to all experimental parameters.</span>
+
+<span class="sd">    All method arguments that are not param_name are treated as</span>
+<span class="sd">    experimental parameter is method is assumed to have been called as</span>
+<span class="sd">    method(*args, **kwargs).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">inspect</span> <span class="k">import</span> <span class="n">getfullargspec</span>
+    <span class="n">arg_values</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">arg_values</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">getfullargspec</span><span class="p">(</span><span class="n">method</span><span class="p">)</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="n">args</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">arg_values</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">arg_values</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;self&#39;</span> <span class="ow">in</span> <span class="n">arg_values</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">arg_values</span><span class="p">[</span><span class="s1">&#39;self&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">arg_values</span>
+
+
+<span class="k">def</span> <span class="nf">write_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">outfile</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Write result to disk.</span>
+
+<span class="sd">    Chose writing method according to result&#39;s type.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span>
+    <span class="kn">import</span> <span class="nn">pandas</span>
+    <span class="n">_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_type</span> <span class="o">==</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">numpy</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">_type</span> <span class="o">==</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="read_result"><a class="viewcode-back" href="../../decu.html#decu.Script.read_result">[docs]</a><span class="k">def</span> <span class="nf">read_result</span><span class="p">(</span><span class="n">infile</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read result from disk.</span>
+
+<span class="sd">    Chose reading method according to result&#39;s type.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span>
+    <span class="kn">import</span> <span class="nn">pandas</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+    <span class="n">ext</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;txt&#39;</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="experiment"><a class="viewcode-back" href="../../decu.html#decu.Script.experiment">[docs]</a><span class="k">def</span> <span class="nf">experiment</span><span class="p">(</span><span class="n">data_param</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorator that adds logging functionality to experiment methods.</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        data_param (str): Parameter treated by the method as data</span>
+<span class="sd">    input. All other parameters are treated as experimental parameters.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        func: A decorator that adds bookkeeping functionality to its</span>
+<span class="sd">        argument.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_experiment</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Decorator that adds bookkeeping functionality to its argument.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        method (function): A experimental computation function.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        The method function, with added logging and bookkeeping</span>
+<span class="sd">        functionality.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">exp_name</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">exp_start_msg</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;start_msg&#39;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">temp</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">exp_name</span><span class="o">=</span><span class="n">exp_name</span><span class="p">,</span> <span class="n">run</span><span class="o">=</span><span class="n">run</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">exp_end_msg</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">elapsed</span><span class="p">):</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;end_msg&#39;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">temp</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">exp_name</span><span class="o">=</span><span class="n">exp_name</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                                        <span class="n">elapsed</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">elapsed</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">run</span><span class="o">=</span><span class="n">run</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">wrote_results_msg</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;write_msg&#39;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">temp</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">exp_name</span><span class="o">=</span><span class="n">exp_name</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                                        <span class="n">outfile</span><span class="o">=</span><span class="n">outfile</span><span class="p">,</span> <span class="n">run</span><span class="o">=</span><span class="n">run</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">decorated</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">with</span> <span class="n">lock</span><span class="p">:</span>
+                <span class="n">decorated</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="n">runs</span><span class="p">[</span><span class="n">decorated</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+                <span class="n">runs</span><span class="p">[</span><span class="n">decorated</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># Make sure the output dir exists</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">results_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">values</span> <span class="o">=</span> <span class="n">get_parameters</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">data_param</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">exp_start_msg</span><span class="p">(</span><span class="n">decorated</span><span class="o">.</span><span class="n">run</span><span class="p">,</span> <span class="n">values</span><span class="p">))</span>
+
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">exp_end_msg</span><span class="p">(</span><span class="n">decorated</span><span class="o">.</span><span class="n">run</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+            <span class="n">outfile</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">make_result_file</span><span class="p">(</span><span class="n">exp_name</span><span class="p">,</span> <span class="n">decorated</span><span class="o">.</span><span class="n">run</span><span class="p">)</span>
+            <span class="n">write_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">wrote_results_msg</span><span class="p">(</span><span class="n">decorated</span><span class="o">.</span><span class="n">run</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">values</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">return</span> <span class="n">decorated</span>
+
+    <span class="k">return</span> <span class="n">_experiment</span></div>
+
+
+
+<div class="viewcode-block" id="figure"><a class="viewcode-back" href="../../decu.html#decu.Script.figure">[docs]</a><span class="k">def</span> <span class="nf">figure</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create the figure decorator.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        show (bool): Whether or not the figure should be shown.</span>
+<span class="sd">        save (bool): Whether or not the figure should be saved to disk.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        func: A decorator that adds figure logging functionality to its</span>
+<span class="sd">        argument.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_figure</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Decorator that adds logging functionality to figure methods.</span>
+
+<span class="sd">        The method must return while the figure is still in memory, i.e.,</span>
+<span class="sd">        neither plt.show or plt.savefig must be called. The resulting</span>
+<span class="sd">        decorated method has a &#39;suffix&#39; parameter that accepts a string</span>
+<span class="sd">        that will be appended to the output file name. The &#39;suffix&#39;</span>
+<span class="sd">        parameter must be passed as a keyword argument.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        show (bool): Whether or not the figure should be shown.</span>
+
+<span class="sd">        save (bool): Whether or not the figure should be saved to disk.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        The figure method, with added logging functionality, and a new</span>
+<span class="sd">        &#39;suffix&#39; parameter.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fig_name</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="k">def</span> <span class="nf">wrote_fig_msg</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;figure&#39;</span><span class="p">][</span><span class="s1">&#39;wrote&#39;</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">temp</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">fig_name</span><span class="o">=</span><span class="n">fig_name</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="n">outfile</span><span class="p">)</span>
+
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">decorated</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># Make sure the output dir exists</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">figures_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+                <span class="n">outfile</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">make_figure_file</span><span class="p">(</span><span class="n">fig_name</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">wrote_fig_msg</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+
+        <span class="k">return</span> <span class="n">decorated</span>
+
+    <span class="k">return</span> <span class="n">_figure</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, leotrs.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
