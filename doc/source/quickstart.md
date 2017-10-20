@@ -379,4 +379,4 @@ And the final result is:
 
 #### Summary
 
-#### Cheat Sheet
+## Cheat Sheet
