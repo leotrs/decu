@@ -50,13 +50,12 @@ class Script():
                             format=self.log_fmt, datefmt=self.time_fmt)
         self.logfile = logfile
 
-    def make_result_file(self, exp_name, run, param=None, ext='txt'):
+    def make_result_file(self, exp_name, run, ext='txt'):
         temp = Template(config['Script']['result_file'])
         return os.path.join(self.results_dir,
                             temp.safe_substitute(time=self.start_time,
                                                  module_name=self.module_name,
-                                                 exp_name=exp_name, param=param,
-                                                 ext=ext, run=run))
+                                                 exp_name=exp_name, run=run, ext=ext))
 
     def make_figure_file(self, fig_name, suffix=None):
         temp = Template(config['Script']['figure_file_wo_suffix'] if suffix is None else
@@ -68,11 +67,11 @@ class Script():
         return os.path.join(self.figures_dir, outfile)
 
 
-def run_parallel(exp, data, params):
+def run_parallel(exp, params):
     """Run an experiment in parallel.
 
-    For each element p in params, call exp(data, p). These calls
-    are made in parallel using multiprocessing.
+    For each element p in params, call exp(*p). These calls are made in
+    parallel using multiprocessing.
 
     Parameters
     ----------
@@ -80,17 +79,15 @@ def run_parallel(exp, data, params):
     exp (method): a method of this class that has been decoreted with
     @experiment.
 
-    data (varies): the data set to feed the experiment.
-
-    params (list): the experiment will be run once for each element in
-    params.
+    params (list of lists): each element is a set of arguments to call exp
+    with.
 
     Returns
     -------
 
-    A dictionary of the form {p1:  result1, p2: result2, ...} where the
-    pi are the elements of params  and resulti is the result of calling
-    exp(data, pi).
+    A dictionary of the form {p1: result1, p2: result2, ...} where the pi
+    are the elements of params and resulti is the result of calling
+    exp(*pi).
 
     """
     def init(*args):
@@ -98,8 +95,8 @@ def run_parallel(exp, data, params):
         lock, runs = args
 
     with Pool(initializer=init, initargs=(lock, runs), maxtasksperchild=100) as pool:
-        results = pool.starmap(exp, [(data, p) for p in params])
-    return {p: results[i] for i, p in enumerate(params)}
+        results = pool.starmap(exp, params)
+    return results
 
 
 def get_parameters(method, param_name, args, kwargs):
