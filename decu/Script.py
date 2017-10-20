@@ -11,6 +11,7 @@ import logging
 from functools import wraps
 from string import Template
 from datetime import datetime
+from collections import defaultdict
 from configparser import ConfigParser
 from multiprocessing import Pool, Value, Lock
 config = ConfigParser(interpolation=None)
@@ -21,7 +22,7 @@ config.read([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
 __all__ = ['Script', 'config', 'experiment', 'figure', 'run_parallel', 'read_result']
 
 lock = Lock()
-runs = Value('i', 0)
+runs = defaultdict(lambda: Value('i', 0))
 
 class Script():
     """Base class for experimental computation scripts."""
@@ -49,12 +50,13 @@ class Script():
                             format=self.log_fmt, datefmt=self.time_fmt)
         self.logfile = logfile
 
-    def make_result_file(self, exp_name, param, ext='txt'):
+    def make_result_file(self, exp_name, run, param=None, ext='txt'):
         temp = Template(config['Script']['result_file'])
         return os.path.join(self.results_dir,
                             temp.safe_substitute(time=self.start_time,
                                                  module_name=self.module_name,
-                                                 exp_name=exp_name, param=param, ext=ext))
+                                                 exp_name=exp_name, param=param,
+                                                 ext=ext, run=run))
 
     def make_figure_file(self, fig_name, suffix=None):
         temp = Template(config['Script']['figure_file_wo_suffix'] if suffix is None else
@@ -201,24 +203,22 @@ def experiment(exp_param=None):
         def decorated(*args, **kwargs):
             obj = args[0]
             with lock:
-                this_run = runs.value
-                decorated.run = runs.value
-                runs.value += 1
+                decorated.run = runs[decorated].value
+                runs[decorated].value += 1
 
             # Make sure the output dir exists
             os.makedirs(obj.results_dir, exist_ok=True)
 
             value = get_argument(method, exp_param, args, kwargs)
-            logging.info(exp_start_msg(this_run, value))
+            logging.info(exp_start_msg(decorated.run, value))
 
             start = time()
             result = method(*args, **kwargs)
             end = time()
-            logging.info(exp_end_msg(this_run, value, end - start))
-            outfile = obj.make_result_file(exp_name)
-            outfile = Template(outfile).safe_substitute(run=this_run)
+            logging.info(exp_end_msg(decorated.run, value, end - start))
+            outfile = obj.make_result_file(exp_name, decorated.run)
             write_result(result, outfile)
-            logging.info(wrote_results_msg(this_run, outfile, value))
+            logging.info(wrote_results_msg(decorated.run, outfile, value))
 
             return result
 

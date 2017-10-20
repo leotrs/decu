@@ -22,7 +22,7 @@ def test_array(tmpdir):
 
     script = TestArray(tmpdir)
     size = 10
-    result_path = script.make_result_file('exp', size)
+    result_path = script.make_result_file('exp', 0, size)
     result_filename = basename(result_path)
 
     assert result_filename not in listdir(script.results_dir)

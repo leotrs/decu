@@ -22,7 +22,8 @@ def test_write(tmpdir):
 
     script = TestWrite(tmpdir)
     pval = 4
-    result_filename = os.path.basename(script.make_result_file('exp', pval))
+    result_filename = os.path.basename(
+        script.make_result_file('exp', 0, pval))
 
     assert result_filename not in os.listdir(script.results_dir)
     script.exp(range(100), pval)
