@@ -58,7 +58,6 @@ def inspect(files, figure=None):
     from subprocess import call
 
     path = files[0]
-
     cfg = decu.config['Script']
     _, filename = os.path.split(path)
     search = re.sub(r'\$\{.*?\}', '(.*?)', re.sub('\.', '\.', cfg['result_file']))
@@ -71,7 +70,7 @@ def inspect(files, figure=None):
 
     py_cmd = Template(decu.config['inspect']['py_cmd']).safe_substitute(
         dir=cfg['scripts_dir'].strip('/'), script=script_name,
-        cls=_class.__name__, cwd=os.getcwd(), path=path)
+        cls=_class.__name__, cwd=os.getcwd(), files=files)
 
     cli_cmd_opts = ['--no-banner']
     if figure is not None:
