@@ -3,6 +3,6 @@
 decu.egg-info/
 *__pycache__*
 logs
-test/testscript/pics/
-test/testscript/logs/
-test/testscript/results/
+test/test_project/pics/
+test/test_project/logs/
+test/test_project/results/
