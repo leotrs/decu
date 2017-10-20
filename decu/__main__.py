@@ -26,9 +26,10 @@ def extract_script_class(module):
             return obj
 
 
-def exec_script(path):
+def exec_script(files):
     """Execute the main function inside a file."""
     import sys
+    path = files[0]
     module_path, module_file = os.path.split(path)
     sys.path.append(make_absolute_path(module_path))
     module_name, _ = os.path.splitext(module_file)
@@ -49,12 +50,14 @@ def init(path):
     print('Initialized empty decu project directory in {}'.format(path))
 
 
-def inspect(path, figure=None):
+def inspect(files, figure=None):
     """Load a result file and go into ipython."""
     import re
     import sys
     from tempfile import NamedTemporaryFile
     from subprocess import call
+
+    path = files[0]
 
     cfg = decu.config['Script']
     _, filename = os.path.split(path)
@@ -89,23 +92,23 @@ def main():
     from argparse import ArgumentParser, ArgumentError
     parser = ArgumentParser(description='Experimental computation utilities.')
     parser.add_argument('mode', choices=['init', 'exec', 'inspect'])
-    parser.add_argument('path', nargs='?', help='the script to be run')
+    parser.add_argument('files', nargs='+', help='the script to be run')
     parser.add_argument('-p', '--plot', help='if using inspect, the '
                         '@figure method to call on the inspected result')
     args = parser.parse_args()
 
     if args.mode == 'exec':
-        if args.path is None:
+        if args.files is None:
             parser.error('path must be specified when using exec')
         else:
-            exec_script(args.path)
+            exec_script(args.files)
     elif args.mode == 'init':
         init(os.getcwd())
     elif args.mode == 'inspect':
-        if args.path is None:
+        if args.files is None:
             parser.error('path must be specified when using inspect')
         else:
-            inspect(args.path, figure=args.plot)
+            inspect(args.files, figure=args.plot)
 
 
 if __name__ == "__main__":
