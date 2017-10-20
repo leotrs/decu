@@ -16,7 +16,7 @@ from decu import experiment, read_result
 def test_array(tmpdir):
     """Test reading and writing and array."""
     class TestArray(util.TestScript):
-        @experiment(data_param=None)
+        @experiment(data_param='size')
         def exp(self, size):
             return np.arange(size)
 
