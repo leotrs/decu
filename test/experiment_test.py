@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 def test_write(tmpdir):
     """Test that @experiment-decorated methods write their results to disk."""
     class TestWrite(util.TestScript):
-        @experiment(exp_param='param')
+        @experiment(data_param='data')
         def exp(self, data, param):
             return np.power(data, param)
 

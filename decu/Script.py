@@ -102,18 +102,22 @@ def run_parallel(exp, data, params):
     return {p: results[i] for i, p in enumerate(params)}
 
 
-def get_argument(method, param_name, args, kwargs):
-    """Get the argument passed to the parameter with name param_name.
+def get_parameters(method, param_name, args, kwargs):
+    """Return the arguments passed to all experimental parameters.
 
-    method is assumed to have been called as method(*args, **kwargs).
+    All method arguments that are not param_name are treated as
+    experimental parameter is method is assumed to have been called as
+    method(*args, **kwargs).
 
     """
-    if param_name in kwargs:
-        return kwargs[param_name]
-    else:
-        from inspect import getfullargspec
-        index = getfullargspec(method).args.index(param_name)
-        return args[index]
+    from inspect import getfullargspec
+    arg_values = kwargs.copy()
+    arg_values.update(dict(zip(getfullargspec(method).args, args)))
+    if param_name in arg_values:
+        del arg_values[param_name]
+    if 'self' in arg_values:
+        del arg_values['self']
+    return arg_values
 
 
 def write_result(result, outfile):
@@ -151,14 +155,15 @@ def read_result(infile):
     return data
 
 
-def experiment(exp_param=None):
+def experiment(data_param=None):
     """Decorator that adds logging functionality to experiment methods.
 
     Parameters
     ----------
 
-    exp_param (str): The name of the parameter that is treated by the
-    method as a experimental parameter.
+    data_param (str): The name of the parameter that is treated by the
+    method as data input. All other parameters are treated as experimental
+    parameters.
 
     Returns
     -------
@@ -184,18 +189,18 @@ def experiment(exp_param=None):
         exp_name = method.__name__
         cfg = config['experiment']
 
-        def exp_start_msg(run, param):
+        def exp_start_msg(run, params):
             temp = Template(cfg['start_msg'])
-            return temp.safe_substitute(exp_name=exp_name, run=run, param=param)
+            return temp.safe_substitute(exp_name=exp_name, run=run, params=params)
 
-        def exp_end_msg(run, param, elapsed):
+        def exp_end_msg(run, params, elapsed):
             temp = Template(cfg['end_msg'])
-            return temp.safe_substitute(exp_name=exp_name, param=param,
+            return temp.safe_substitute(exp_name=exp_name, params=params,
                                         elapsed=round(elapsed, 5), run=run)
 
-        def wrote_results_msg(run, outfile, param):
+        def wrote_results_msg(run, outfile, params):
             temp = Template(cfg['write_msg'])
-            return temp.safe_substitute(exp_name=exp_name, param=param,
+            return temp.safe_substitute(exp_name=exp_name, params=params,
                                         outfile=outfile, run=run)
 
         from time import time
@@ -209,16 +214,16 @@ def experiment(exp_param=None):
             # Make sure the output dir exists
             os.makedirs(obj.results_dir, exist_ok=True)
 
-            value = get_argument(method, exp_param, args, kwargs)
-            logging.info(exp_start_msg(decorated.run, value))
+            values = get_parameters(method, data_param, args, kwargs)
+            logging.info(exp_start_msg(decorated.run, values))
 
             start = time()
             result = method(*args, **kwargs)
             end = time()
-            logging.info(exp_end_msg(decorated.run, value, end - start))
+            logging.info(exp_end_msg(decorated.run, values, end - start))
             outfile = obj.make_result_file(exp_name, decorated.run)
             write_result(result, outfile)
-            logging.info(wrote_results_msg(decorated.run, outfile, value))
+            logging.info(wrote_results_msg(decorated.run, outfile, values))
 
             return result
 

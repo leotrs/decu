@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 class TestScript(Script):
 
-    @experiment(exp_param='param')
+    @experiment(data_param='data')
     def exp(self, data, param):
         """Compute x**param for each data point."""
         logging.info('Working hard for {}..'.format(TestScript.exp.run))
