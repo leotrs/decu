@@ -119,10 +119,13 @@ def write_result(result, outfile):
     import numpy
     import pandas
     _type = type(result)
+
     if _type == numpy.ndarray:
         numpy.savetxt(outfile, numpy.array(result))
     elif _type == pandas.DataFrame:
         result.to_csv(outfile)
+    else:
+        numpy.savetxt(outfile, numpy.array(result))
 
 
 def read_result(infile):
