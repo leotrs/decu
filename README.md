@@ -1,6 +1,6 @@
 # decu
 
-![RTD Badge](https://readthedocs.org/projects/pip/badge/)
+![RTD Badge](https://readthedocs.org/projects/decu/badge/)
 
 `decu` stands for "Decu is a Experimental Computation Utility". `decu`
 arose from the need for standardization and automation of several
