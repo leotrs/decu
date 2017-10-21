@@ -330,13 +330,13 @@ You can also read the log file to see that it mentions which method
 
 Oh, darn. We forgot to add a title to our plot. After we have modified our
 `fig` function to include a nice title, we can generate the new plot in a
-number of ways. First, we can modify the `fig` method and run the whole
-thing again. This becomes increasingly cumbersome (and sometimes outright
-impossible) if `exp` takes too long to run, as it often does in real
-life. Second, since we have the result file, we can pop into a python
-interpreter, read the result from disk, and call `fig` again. This would
-require us to not only load the result, but the file `script.py` and
-instantiate the class `MyScript`. How tedious.
+number of ways. First, we can run the whole thing again. This becomes
+increasingly cumbersome (and sometimes outright impossible) if `exp` takes
+too long to run, as it often does in real life. Second, since we have the
+result file, we can pop into a python interpreter, read the result from
+disk, and call `fig` again. This would require us to not only load the
+result, but the file `script.py` and instantiate the class `MyScript`. How
+tedious.
 
 OR, we can use `decu` to do exactly that.
 
