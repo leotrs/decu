@@ -43,14 +43,3 @@ def test_exec():
     assert os.listdir(cfg['logs_dir'])
     assert os.listdir(cfg['figures_dir'])
     assert os.listdir(cfg['results_dir'])
-
-
-def test_inspect_plot():
-    """Test `decu inspect <result> --plot plot_result`."""
-    cfg = decu.config['Script']
-    num_files = len(os.listdir(cfg['figures_dir']))
-
-    results_file = choice(os.listdir(cfg['results_dir']))
-    call(['decu', 'inspect', '{}/{}'.format(cfg['results_dir'], results_file),
-          '--plot', 'plot_result'])
-    assert len(os.listdir(cfg['figures_dir'])) == num_files + 1

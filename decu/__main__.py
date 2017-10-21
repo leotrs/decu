@@ -26,11 +26,10 @@ def extract_script_class(module):
             return obj
 
 
-def exec_script(files):
+def exec_script(file):
     """Execute the main function inside a file."""
     import sys
-    path = files[0]
-    module_path, module_file = os.path.split(path)
+    module_path, module_file = os.path.split(file)
     sys.path.append(make_absolute_path(module_path))
     module_name, _ = os.path.splitext(module_file)
     module = import_module(module_name)
@@ -50,7 +49,17 @@ def init(path):
     print('Initialized empty decu project directory in {}'.format(path))
 
 
-def inspect(files, figure=None):
+def parse_inspect_opts(opts):
+    """Parse the remainder of the options given to decu inspect."""
+    import sys
+    if len(opts) % 2 != 0:
+        print('additional options need to come in pairs')
+        sys.exit(2)
+    return {name.strip('-'): path for name, path in
+            [opts[i:i + 2] for i in range(0, len(opts), 2)]}
+
+
+def inspect(files, **kwargs):
     """Load a result file and go into ipython."""
     import re
     import sys
@@ -58,32 +67,40 @@ def inspect(files, figure=None):
     from subprocess import call
 
     path = files[0]
-    cfg = decu.config['Script']
+    scr_cfg = decu.config['Script']
+    ins_cfg = decu.config['inspect']
     _, filename = os.path.split(path)
-    search = re.sub(r'\$\{.*?\}', '(.*?)', re.sub('\.', '\.', cfg['result_file']))
+    search = re.sub(r'\$\{.*?\}', '(.*?)', re.sub('\.', '\.', scr_cfg['result_file']))
     search = r'^{}$'.format(search)
     script_name = re.match(search, filename).group(2)
 
-    sys.path.append(cfg['scripts_dir'])
+    sys.path.append(scr_cfg['scripts_dir'])
     module = import_module(script_name)
     _class = extract_script_class(module)
 
-    py_cmd = Template(decu.config['inspect']['py_cmd']).safe_substitute(
-        dir=cfg['scripts_dir'].strip('/'), script=script_name,
+    py_cmd = Template(ins_cfg['py_cmd']).safe_substitute(
+        dir=scr_cfg['scripts_dir'].strip('/'), script=script_name,
         cls=_class.__name__, cwd=os.getcwd(), files=files)
-    py_cmd_noshow = Template(decu.config['inspect']['py_cmd_noshow']).safe_substitute(
-        dir=cfg['scripts_dir'].strip('/'), script=script_name,
+    py_cmd_noshow = Template(ins_cfg['py_cmd_noshow']).safe_substitute(
+        dir=scr_cfg['scripts_dir'].strip('/'), script=script_name,
         cls=_class.__name__, cwd=os.getcwd(), files=files)
-    py_cmd_full = '{}\n{}'.format(py_cmd, py_cmd_noshow)
-    py_cmd_show = '{}\n{}'.format(py_cmd, decu.config['inspect']['noshow_replace'])
+    py_cmd_full = '\n'.join([py_cmd, py_cmd_noshow] +
+                            ['{} = np.loadtxt("{}")'.format(name, path)
+                             for name, path in kwargs.items()])
 
     cli_cmd_opts = ['--no-banner']
-    if figure is not None:
-        py_cmd_full += '\nscript.{}(np.arange(5), result)\n'.format(figure)
-    else:
-        cli_cmd_opts.append('-i')
+    # if figure is not None:
+    #     py_cmd_full += '\nscript.{}(np.arange(5), result)\n'.format(figure)
+    # else:
+    #     cli_cmd_opts.append('-i')
+    cli_cmd_opts.append('-i')
 
+    py_cmd_show = py_cmd + '\n' + \
+        '\n'.join(Template(ins_cfg['noshow_replace']).safe_substitute(var=name)
+                  for name in ['result'] + list(kwargs.keys()))
+    py_cmd_show = '>>> ' + re.sub(r'\n(.)', r'\n>>> \1', py_cmd_show)
     print(py_cmd_show)
+
     with NamedTemporaryFile('w+') as tmp:
         tmp.write(py_cmd_full)
         tmp.read()
@@ -93,26 +110,39 @@ def inspect(files, figure=None):
 
 def main():
     """Execute the script passed as command line argument."""
-    from argparse import ArgumentParser, ArgumentError
-    parser = ArgumentParser(description='Experimental computation utilities.')
-    parser.add_argument('mode', choices=['init', 'exec', 'inspect'])
-    parser.add_argument('files', nargs='+', help='the script to be run')
-    parser.add_argument('-p', '--plot', help='if using inspect, the '
-                        '@figure method to call on the inspected result')
+    import sys
+    import argparse
+    parser = argparse.ArgumentParser(description='Experimental computation utilities.')
+    subparsers = parser.add_subparsers(help='sub-command help', dest='command')
+
+    parser_init = subparsers.add_parser('init', help='initialize a decu '
+                                        'project under this directory')
+
+    parser_exec = subparsers.add_parser('exec', help='run a script with decu')
+    parser_exec.add_argument('file', help='the script to be run')
+
+    parser_inspect = subparsers.add_parser('inspect', help='inspect results')
+    parser_inspect.add_argument('files', nargs='+', help='files to be'
+                                'loaded as result')
+    # parser_inspect.add_argument('-p', '--plot', help='if using inspect, the '
+    #                             '@figure method to call on the inspected result')
+    parser_inspect.add_argument('opts', nargs=argparse.REMAINDER,
+                                help='pairs of name and file paths to read '
+                                'as additional variables')
     args = parser.parse_args()
 
-    if args.mode == 'exec':
-        if args.files is None:
-            parser.error('path must be specified when using exec')
-        else:
-            exec_script(args.files)
-    elif args.mode == 'init':
+    if args.command is None:
+        parser.print_help()
+        sys.exit(0)
+
+    elif args.command == 'exec':
+        exec_script(args.file)
+
+    elif args.command == 'init':
         init(os.getcwd())
-    elif args.mode == 'inspect':
-        if args.files is None:
-            parser.error('path must be specified when using inspect')
-        else:
-            inspect(args.files, figure=args.plot)
+
+    elif args.command == 'inspect':
+        inspect(args.files, **parse_inspect_opts(args.opts))
 
 
 if __name__ == "__main__":
