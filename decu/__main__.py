@@ -71,16 +71,21 @@ def inspect(files, figure=None):
     py_cmd = Template(decu.config['inspect']['py_cmd']).safe_substitute(
         dir=cfg['scripts_dir'].strip('/'), script=script_name,
         cls=_class.__name__, cwd=os.getcwd(), files=files)
+    py_cmd_noshow = Template(decu.config['inspect']['py_cmd_noshow']).safe_substitute(
+        dir=cfg['scripts_dir'].strip('/'), script=script_name,
+        cls=_class.__name__, cwd=os.getcwd(), files=files)
+    py_cmd_full = '{}\n{}'.format(py_cmd, py_cmd_noshow)
+    py_cmd_show = '{}\n{}'.format(py_cmd, decu.config['inspect']['noshow_replace'])
 
     cli_cmd_opts = ['--no-banner']
     if figure is not None:
-        py_cmd += '\nscript.{}(np.arange(5), result)\n'.format(figure)
+        py_cmd_full += '\nscript.{}(np.arange(5), result)\n'.format(figure)
     else:
         cli_cmd_opts.append('-i')
 
-    print(py_cmd)
+    print(py_cmd_show)
     with NamedTemporaryFile('w+') as tmp:
-        tmp.write(py_cmd)
+        tmp.write(py_cmd_full)
         tmp.read()
         cli_cmd = ['ipython', tmp.name] + cli_cmd_opts
         call(cli_cmd)
