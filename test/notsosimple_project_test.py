@@ -1,8 +1,8 @@
 """
-project_test.py
----------------
+notsosimple_project_test.py
+---------------------------
 
-Run `decu` on the mock project test_project.
+Run `decu` on the mock project notsosimple_project.
 
 """
 
@@ -12,7 +12,7 @@ import pytest
 from random import choice
 from subprocess import call
 
-PROJECT_DIR = 'test_project/'
+PROJECT_DIR = 'notsosimple_project/'
 
 
 # Finalization code. See

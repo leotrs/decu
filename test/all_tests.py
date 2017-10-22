@@ -11,7 +11,9 @@ import pytest
 
 
 def main():
-    cmd_list = [['config_test.py'], ['-k', 'not isolated']]
+    cmd_list = [['config_test.py'],
+                ['simple_project_test.py'],
+                ['-k', 'not isolated']]
 
     for cmd in cmd_list:
         print(' '.join(cmd))
