@@ -2,24 +2,17 @@
 __main__.py
 -----------
 
-Main decu executable.
+decu console commands.
 
 """
 
 import os
+import sys
 import decu
 from importlib import import_module
-from string import Template
 
 
-def make_absolute_path(path):
-    """Return the absolute path."""
-    if not os.path.isabs(path):
-        return os.path.join(os.getcwd(), path)
-    return path
-
-
-def extract_script_class(module):
+def _extract_script_class(module):
     """Return the subclass of decu.Script found in module."""
     for obj in module.__dict__.values():
         if isinstance(obj, type) and decu.Script in obj.__bases__:
@@ -27,17 +20,17 @@ def extract_script_class(module):
 
 
 def exec_script(files):
-    """Execute the main function inside a file."""
-    import sys
+    """Execute the main function inside each file."""
     import logging
 
     for file in files:
         module_path, module_file = os.path.split(file)
-        sys.path.append(make_absolute_path(module_path))
         module_name, _ = os.path.splitext(module_file)
-        module = import_module(module_name)
         project_dir, _ = os.path.split(module_path)
-        script = extract_script_class(module)(project_dir, module_file)
+        sys.path.append(os.path.abspath(module_path))
+
+        module = import_module(module_name)
+        script = _extract_script_class(module)(project_dir, module_file)
         script.main()
         logger = logging.getLogger()
         for handler in logger.handlers[:]:
@@ -45,21 +38,16 @@ def exec_script(files):
             logger.removeHandler(handler)
 
 
-def init(path):
-    """Initialize the path for a decu project."""
-    from os.path import join
-    mkdir = lambda name: os.makedirs(join(path, name), exist_ok=True)
-    mkdir(decu.config['Script']['data_dir'])
-    mkdir(decu.config['Script']['logs_dir'])
-    mkdir(decu.config['Script']['results_dir'])
-    mkdir(decu.config['Script']['figures_dir'])
-    mkdir(decu.config['Script']['scripts_dir'])
-    print('Initialized empty decu project directory in {}'.format(path))
+def init(directory):
+    """Initialize the directory for a decu project."""
+    mkdir = lambda name: os.makedirs(os.path.join(directory, name), exist_ok=True)
+    for dir_name in [key for key in decu.config['Script'] if key.endswith('_dir')]:
+        mkdir(decu.config['Script'][dir_name])
+    print('Initialized empty decu project directory in {}'.format(directory))
 
 
-def parse_inspect_opts(opts):
+def _parse_inspect_opts(opts):
     """Parse the remainder of the options given to decu inspect."""
-    import sys
     if len(opts) % 2 != 0:
         print('additional options need to come in pairs')
         sys.exit(2)
@@ -70,9 +58,9 @@ def parse_inspect_opts(opts):
 def inspect(files, **kwargs):
     """Load a result file and go into ipython."""
     import re
-    import sys
-    from tempfile import NamedTemporaryFile
+    from string import Template
     from subprocess import call
+    from tempfile import NamedTemporaryFile
 
     path = files[0]
     scr_cfg = decu.config['Script']
@@ -84,7 +72,7 @@ def inspect(files, **kwargs):
 
     sys.path.append(scr_cfg['scripts_dir'])
     module = import_module(script_name)
-    _class = extract_script_class(module)
+    _class = _extract_script_class(module)
 
     py_cmd = Template(ins_cfg['py_cmd']).safe_substitute(
         dir=scr_cfg['scripts_dir'].strip('/'), script=script_name,
@@ -118,10 +106,9 @@ def inspect(files, **kwargs):
 
 def main():
     """Execute the script passed as command line argument."""
-    import sys
     import argparse
     parser = argparse.ArgumentParser(description='Experimental computation utilities.')
-    subparsers = parser.add_subparsers(help='sub-command help', dest='command')
+    subparsers = parser.add_subparsers(help='command', dest='command')
 
     parser_init = subparsers.add_parser('init', help='initialize a decu '
                                         'project under this directory')
@@ -132,8 +119,6 @@ def main():
     parser_inspect = subparsers.add_parser('inspect', help='inspect results')
     parser_inspect.add_argument('files', nargs='+', help='files to be'
                                 'loaded as result')
-    # parser_inspect.add_argument('-p', '--plot', help='if using inspect, the '
-    #                             '@figure method to call on the inspected result')
     parser_inspect.add_argument('opts', nargs=argparse.REMAINDER,
                                 help='pairs of name and file paths to read '
                                 'as additional variables')
@@ -150,7 +135,7 @@ def main():
         init(os.getcwd())
 
     elif args.command == 'inspect':
-        inspect(args.files, **parse_inspect_opts(args.opts))
+        inspect(args.files, **_parse_inspect_opts(args.opts))
 
 
 if __name__ == "__main__":
