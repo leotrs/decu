@@ -41,7 +41,6 @@ Clone this repo, `cd` to the decu directory and do
 
 ```
 $ pip install .
-
 ```
 
 Now you have a local installation of `decu`. If you are going to make edits
