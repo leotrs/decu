@@ -36,7 +36,8 @@ def exec_script(files):
         sys.path.append(make_absolute_path(module_path))
         module_name, _ = os.path.splitext(module_file)
         module = import_module(module_name)
-        script = extract_script_class(module)(os.getcwd(), module_file)
+        project_dir, _ = os.path.split(module_path)
+        script = extract_script_class(module)(project_dir, module_file)
         script.main()
         logger = logging.getLogger()
         for handler in logger.handlers[:]:
