@@ -7,6 +7,7 @@ decu console commands.
 """
 
 import os
+import re
 import sys
 import decu
 from importlib import import_module
@@ -55,50 +56,56 @@ def _parse_inspect_opts(opts):
             [opts[i:i + 2] for i in range(0, len(opts), 2)]}
 
 
-def inspect(files, **kwargs):
-    """Load a result file and go into ipython."""
-    import re
+def _get_script_name(file):
+    """Extract the script name that generated the file."""
+    _, filename = os.path.split(file)
+    search = re.sub(r'\$\{.*?\}', '(.*?)',
+                    re.sub(r'\.', r'\.', decu.config['Script']['result_file']))
+    search = r'^{}$'.format(search)
+    return re.match(search, filename).group(2)
+
+
+def _make_py_script(script, files, kwargs):
+    """Build the script that will be run within iPython."""
     from string import Template
+    scr_cfg = decu.config['Script']
+    ins_cfg = decu.config['inspect']
+
+    sys.path.append(scr_cfg['scripts_dir'])
+    module = import_module(script)
+    class_name = _extract_script_class(module).__name__
+
+    cmd = Template(ins_cfg['py_cmd']).safe_substitute(
+        dir=scr_cfg['scripts_dir'].strip('/'), script=script,
+        cls=class_name, cwd=os.getcwd(), files=files)
+    cmd_noshow = Template(ins_cfg['py_cmd_noshow']).safe_substitute(
+        dir=scr_cfg['scripts_dir'].strip('/'), script=script,
+        cls=class_name, cwd=os.getcwd(), files=files)
+    cmd_full = '\n'.join([cmd, cmd_noshow] +
+                         ['{} = np.loadtxt("{}")'.format(name, path)
+                          for name, path in kwargs.items()])
+
+    cmd_show = cmd + '\n' + \
+        '\n'.join(Template(ins_cfg['noshow_replace']).safe_substitute(var=name)
+                  for name in ['result'] + list(kwargs.keys()))
+    cmd_show = '>>> ' + re.sub(r'\n(.)', r'\n>>> \1', cmd_show)
+
+    return cmd_full, cmd_show
+
+
+def inspect(files, **kwargs):
+    """Load files into ipython."""
     from subprocess import call
     from tempfile import NamedTemporaryFile
 
-    path = files[0]
-    scr_cfg = decu.config['Script']
-    ins_cfg = decu.config['inspect']
-    _, filename = os.path.split(path)
-    search = re.sub(r'\$\{.*?\}', '(.*?)', re.sub('\.', '\.', scr_cfg['result_file']))
-    search = r'^{}$'.format(search)
-    script_name = re.match(search, filename).group(2)
-
-    sys.path.append(scr_cfg['scripts_dir'])
-    module = import_module(script_name)
-    _class = _extract_script_class(module)
-
-    py_cmd = Template(ins_cfg['py_cmd']).safe_substitute(
-        dir=scr_cfg['scripts_dir'].strip('/'), script=script_name,
-        cls=_class.__name__, cwd=os.getcwd(), files=files)
-    py_cmd_noshow = Template(ins_cfg['py_cmd_noshow']).safe_substitute(
-        dir=scr_cfg['scripts_dir'].strip('/'), script=script_name,
-        cls=_class.__name__, cwd=os.getcwd(), files=files)
-    py_cmd_full = '\n'.join([py_cmd, py_cmd_noshow] +
-                            ['{} = np.loadtxt("{}")'.format(name, path)
-                             for name, path in kwargs.items()])
+    script_name = _get_script_name(files)
+    cmd, cmd_show = _make_py_script(script_name, files, kwargs)
+    print(cmd_show)
 
     cli_cmd_opts = ['--no-banner']
-    # if figure is not None:
-    #     py_cmd_full += '\nscript.{}(np.arange(5), result)\n'.format(figure)
-    # else:
-    #     cli_cmd_opts.append('-i')
     cli_cmd_opts.append('-i')
-
-    py_cmd_show = py_cmd + '\n' + \
-        '\n'.join(Template(ins_cfg['noshow_replace']).safe_substitute(var=name)
-                  for name in ['result'] + list(kwargs.keys()))
-    py_cmd_show = '>>> ' + re.sub(r'\n(.)', r'\n>>> \1', py_cmd_show)
-    print(py_cmd_show)
-
     with NamedTemporaryFile('w+') as tmp:
-        tmp.write(py_cmd_full)
+        tmp.write(cmd)
         tmp.read()
         cli_cmd = ['ipython', tmp.name] + cli_cmd_opts
         call(cli_cmd)
