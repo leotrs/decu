@@ -26,15 +26,22 @@ def extract_script_class(module):
             return obj
 
 
-def exec_script(file):
+def exec_script(files):
     """Execute the main function inside a file."""
     import sys
-    module_path, module_file = os.path.split(file)
-    sys.path.append(make_absolute_path(module_path))
-    module_name, _ = os.path.splitext(module_file)
-    module = import_module(module_name)
-    script = extract_script_class(module)(os.getcwd(), module_file)
-    script.main()
+    import logging
+
+    for file in files:
+        module_path, module_file = os.path.split(file)
+        sys.path.append(make_absolute_path(module_path))
+        module_name, _ = os.path.splitext(module_file)
+        module = import_module(module_name)
+        script = extract_script_class(module)(os.getcwd(), module_file)
+        script.main()
+        logger = logging.getLogger()
+        for handler in logger.handlers[:]:
+            handler.flush()
+            logger.removeHandler(handler)
 
 
 def init(path):
@@ -119,7 +126,7 @@ def main():
                                         'project under this directory')
 
     parser_exec = subparsers.add_parser('exec', help='run a script with decu')
-    parser_exec.add_argument('file', help='the script to be run')
+    parser_exec.add_argument('files', nargs='+', help='the script(s) to be run')
 
     parser_inspect = subparsers.add_parser('inspect', help='inspect results')
     parser_inspect.add_argument('files', nargs='+', help='files to be'
@@ -136,7 +143,7 @@ def main():
         sys.exit(0)
 
     elif args.command == 'exec':
-        exec_script(args.file)
+        exec_script(args.files)
 
     elif args.command == 'init':
         init(os.getcwd())
