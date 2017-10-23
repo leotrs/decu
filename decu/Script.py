@@ -15,6 +15,14 @@ from collections import defaultdict
 from configparser import ConfigParser
 from multiprocessing import Pool, Value, Lock
 config = ConfigParser(interpolation=None)
+
+print([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
+       os.path.expanduser('~/.decu.cfg'),
+       os.path.join(os.getcwd(), 'decu.cfg')])
+
+print(os.listdir(os.path.dirname(__file__)))
+
+
 config.read([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
              os.path.expanduser('~/.decu.cfg'),
              os.path.join(os.getcwd(), 'decu.cfg')])

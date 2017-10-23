@@ -9,4 +9,4 @@ before_script: cd test/
 script:
   - pytest config_test.py
   - pytest simple_project_test.py
-  - pytest -k not isolated
+  - pytest -k "not isolated"
