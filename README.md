@@ -2,17 +2,14 @@
 
 ![RTD Badge](https://readthedocs.org/projects/decu/badge/)
 
-`decu` stands for "Decu is a Experimental Computation Utility". `decu`
-arose from the need for standardization and automation of several
-day-to-day tasks when running scripts for experimental computation. If
-you've ever caught yourself spending more time in bookkeeping your files
-and directories, or on committing small tweaks to your scripts, `decu` is
-for you.
+`decu` stands for "Decu is a Experimental Computation Utility". `decu` is a
+suite of command line tools to automate the menial tasks involved in the
+development of experimental computation projects.
 
 
 ## Experimental Computation
 
-We define a 'experimental computation' script as a script that reads some
+We define a "experimental computation" script as a script that reads some
 data, performs an experiment (run an algorithm, train a model, plot a
 figure, etc), saves some results to disk, and then quits. Some tasks that
 are usually involved in this are:
@@ -31,7 +28,7 @@ algorithms of interest, thus making said algorithms harder to maintain and
 debug.
 
 The main goal of `decu` is to provide standardization and automation of
-these tasks, with end code that clearly separate experimental computation
+these tasks, with end code that clearly separates experimental computation
 from bookkeeping and other auxiliary code.
 
 
@@ -52,7 +49,8 @@ to `decu`, don't forget to use the `-e` flag.
 For a simple example, please see the
 [quick start page](https://decu.readthedocs.io/en/latest/quickstart.html). For
 more, see the
-[tutorial](https://decu.readthedocs.io/en/latest/tutorial.html).
+[tutorial](https://decu.readthedocs.io/en/latest/tutorial.html) and the
+[documentation](https://decu.readthedocs.io/) page.
 
 ## Best practices
 
