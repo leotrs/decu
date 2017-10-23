@@ -21,6 +21,7 @@ print([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
        os.path.join(os.getcwd(), 'decu.cfg')])
 
 print(os.listdir(os.path.dirname(__file__)))
+print(os.listdir(os.path.split(os.path.dirname(__file__))[0]))
 
 
 config.read([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
