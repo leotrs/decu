@@ -1,6 +1,7 @@
 # decu
 
-![RTD Badge](https://readthedocs.org/projects/decu/badge/)
+![docs Badge](https://readthedocs.org/projects/decu/badge/)
+![test Badge](https://travis-ci.org/leotrs/decu.svg?branch=master)
 
 `decu` stands for "Decu is a Experimental Computation Utility". `decu` is a
 suite of command line tools to automate the menial tasks involved in the
