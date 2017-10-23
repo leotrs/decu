@@ -59,8 +59,8 @@ class Script():
                                                  exp_name=exp_name, run=run, ext=ext))
 
     def make_figure_file(self, fig_name, suffix=None):
-        temp = Template(config['Script']['figure_file_wo_suffix'] if suffix is None else
-                        config['Script']['figure_file_w_suffix'])
+        temp = Template(config['Script']['figure_wo_suffix_file'] if suffix is None else
+                        config['Script']['figure_w_suffix_file'])
         outfile = temp.safe_substitute(time=self.start_time,
                                        module_name=self.module_name,
                                        fig_name=fig_name, suffix=suffix,
