@@ -1,25 +1,16 @@
 # Tutorial
 
-This is the `decu` tutorial. Follow a long for a quick tour of `decu`'s
-main features.
+This is the `decu` tutorial. Follow a long for a tour of `decu`'s main
+features.
 
-## Assumptions
+## Example
 
-## Three sets of functionality
-
-### `init`
-
-### `exec`
-
-### `inspect`
-
-## Tutorial
-
-Now that you have `decu` installed in your (virtual) environment, here is
-an example project. This example will showcase the three main sets of
-functionality that `decu` provides: project organization, bookkeeping, and
-inspection. It is best if you follow along this example by copying and
-pasting the source code we show below in a temporary project.
+After you have installed `decu` in your (virtual) environment, you can
+follow along with this example project. This example will showcase the
+three main sets of functionality that `decu` provides: project
+organization, bookkeeping, and inspection. It is best if you follow along
+by copying and pasting the source code we show below in a temporary
+project.
 
 #### Project organization: `decu init`
 
@@ -382,5 +373,3 @@ In [2]: exit
 And the final result is:
 
 ![decu is awesome](_static/fig_file2.png "decu is wonderful")
-
-#### Summary
