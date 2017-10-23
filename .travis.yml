@@ -7,4 +7,6 @@ install:
   - pip install -r requirements.txt
 before_script: cd test/
 script:
-  - python all_tests.py
+  - pytest config_test.py
+  - pytest simple_project_test.py
+  - pytest -k not isolated
