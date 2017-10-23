@@ -7,4 +7,4 @@ install:
   - pip install -r requirements.txt
 before_script: cd test/
 script:
-  - make test
+  - python all_tests.py
