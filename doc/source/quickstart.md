@@ -5,6 +5,16 @@ having to go through a two hour long lecture, this is the place for you.
 
 ## Installation
 
+Clone [this](https://github.com/leotrs/decu) repo, `cd` to the decu
+directory and do
+
+```
+$ pip install .
+```
+
+Now you have a local installation of `decu`. If you are going to make edits
+to `decu`, don't forget to use the `-e` flag.
+
 ## Start a new project
 
 To start a new project, choose a directory in your file system, say
@@ -26,9 +36,9 @@ Here's the what you need to know in order to use `decu` inside `root_dir`:
 
 ## Development
 
-If you `ls` your `root_dir`, you will find a newly created `scr/`. This is
-where all your computational experiments go. For this example, we will use
-the following file, `script.py`:
+If you `ls` your `root_dir`, you will find a newly created `scr/`
+directory. This is where all your computational experiments go. For this
+example, we will use the following file, `script.py`:
 
 ```
 import decu
@@ -60,9 +70,9 @@ Here's the what you need to know in order to develop `decu` scripts:
   should be decorated with `@decu.experiment`.
 + `decu.experiment`-decorated methods must accept at least one
   parameter. This will be treated as the data input, and its name must be
-  passed to the decorator. In the above example, the data input parameter
-  is called *data*, and thus we pass the string `"data"` to
-  `decu.experiment`.
+  passed to the decorator. In the above example, the `exp` method is
+  decorated with `decu.experiment` with data input parameter *data*, and
+  thus we pass the string `"data"` to `decu.experiment`.
 + All other parameters will be treated as experimental parameters that tune
   the behavior of the algorithm.
 
@@ -82,7 +92,7 @@ $ decu inspect results/<result_file1>
 >>> import decu
 >>> import numpy as np
 >>> import src.script as script
->>> script = script.MyScript('/tmp/foo2', 'script')
+>>> script = script.MyScript('<root_dir>', 'script')
 >>> # loaded result
 
 In[1]:
@@ -93,7 +103,7 @@ mistake. The contents of `<result_file1>` have been loaded in the variable
 `result`.
 
 Observe that we can fix our mistake by adding `3.14` to each element in the
-`result` array.
+`result` array. So we do so in iPython:
 
 ```
 In[1]: result += 3.14
@@ -116,13 +126,13 @@ In[3]: np.savetxt(script.make_result_file("exp", 0), result)
 ```
 
 We need to specify `"exp"` as this was the `@decu.experiment`-decorated
-method that originally created the result.
+method that originally created the result. We can close iPython now.
 
 Here's what you need to know in order to use `decu inspect`:
 
 + `decu`'s default file names may seem complicated but they are useful when
   inspecting results, as `decu` can know from the file name what script,
-  class, and method that generated a result.
+  class, and method generated a result file.
 
 ## We're done!
 
@@ -134,4 +144,4 @@ logging, and directories have been handled by `decu` for us.
 This is only a sliver of what one can do with `decu`, but it should give
 you the minimum you need to know to start using it in your projects.
 
-## Cheat Sheet
+For a more detailed example, see the [tutorial](tutorial.html).

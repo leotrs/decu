@@ -1,5 +1,5 @@
-decu package
-============
+Reference
+=========
 
 Module contents
 ---------------
