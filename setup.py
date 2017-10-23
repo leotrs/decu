@@ -22,7 +22,7 @@ setup(
     author_email='leo@leotrs.com',
     description='Decu is a Experimental Computation Utility',
     long_description='',
-    license='MIT'
+    license='MIT',
     packages=find_packages(),
     entry_points={'console_scripts': ['decu=decu.__main__:main']},
     zip_safe=False,
