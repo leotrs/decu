@@ -56,8 +56,9 @@ def _parse_inspect_opts(opts):
             [opts[i:i + 2] for i in range(0, len(opts), 2)]}
 
 
-def _get_script_name(file):
+def _get_script_name(files):
     """Extract the script name that generated the file."""
+    file = files[0]
     _, filename = os.path.split(file)
     search = re.sub(r'\$\{.*?\}', '(.*?)',
                     re.sub(r'\.', r'\.', decu.config['Script']['result_file']))
