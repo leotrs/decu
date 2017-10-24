@@ -42,13 +42,14 @@ class Script():
     log_fmt = config['Script']['log_fmt']
     time_fmt = config['Script']['time_fmt']
 
-    def __init__(self, project_dir=None):
+    def __init__(self, project_dir=None, module=None):
         self.start_time = datetime.now()
         self.project_dir = os.getcwd() if project_dir is None else project_dir
+        self.module = self.__module__ if module is None else module
 
         os.makedirs(self.logs_dir, exist_ok=True)
         logfile = Template(config['Script']['log_file']).safe_substitute(
-            time=self.start_time, module_name=self.__module__)
+            time=self.start_time, module_name=self.module)
         logfile = os.path.join(self.project_dir, self.logs_dir, logfile)
         logging.basicConfig(level=logging.INFO, filename=logfile,
                             format=self.log_fmt, datefmt=self.time_fmt)
@@ -58,14 +59,14 @@ class Script():
         temp = Template(config['Script']['result_file'])
         return os.path.join(self.results_dir,
                             temp.safe_substitute(time=self.start_time,
-                                                 module_name=self.__module__,
+                                                 module_name=self.module,
                                                  exp_name=exp_name, run=run, ext=ext))
 
     def make_figure_file(self, fig_name, suffix=None):
         temp = Template(config['Script']['figure_wo_suffix_file'] if suffix is None else
                         config['Script']['figure_w_suffix_file'])
         outfile = temp.safe_substitute(time=self.start_time,
-                                       module_name=self.__module__,
+                                       module_name=self.module,
                                        fig_name=fig_name, suffix=suffix,
                                        ext=self.figure_fmt)
         return os.path.join(self.figures_dir, outfile)
