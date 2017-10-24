@@ -16,6 +16,7 @@ from configparser import ConfigParser
 from multiprocessing import Pool, Value, Lock
 import matplotlib.pyplot as plt
 if 'DISPLAY' not in os.environ:
+    print('using Agg..')
     import matplotlib
     matplotlib.use('Agg')
 
