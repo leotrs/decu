@@ -12,7 +12,8 @@ import pytest
 
 def main():
     cmd_list = [['config_test.py'],
-                ['simple_project_test.py'],
+                ['simple_project_test.py::test_exec_multiple_args'],
+                ['simple_project_test.py::test_exec_single_arg'],
                 ['-k', 'not isolated']]
 
     for cmd in cmd_list:

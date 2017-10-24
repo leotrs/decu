@@ -36,7 +36,16 @@ def teardown():
 
 
 @pytest.mark.isolated
-def test_exec_multiple_args(tmpdir):
+def test_exec_single_arg():
+    """`decu exec` should accept one single argument."""
+    cfg = decu.config['Script']
+    main.exec_script([os.path.join(cfg['scripts_dir'], 'script1.py')])
+    assert len(os.listdir(cfg['logs_dir'])) == 1
+    assert len(os.listdir(cfg['results_dir'])) == 1
+
+
+@pytest.mark.isolated
+def test_exec_multiple_args():
     """`decu exec` on two equal scripts should generate two equal log files.
 
     This is a randomized test. The log files will be equal, except for the
