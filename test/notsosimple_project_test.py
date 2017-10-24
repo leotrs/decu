@@ -22,9 +22,9 @@ def teardown():
     """Guarantee a clean slate before and after all tests in this module."""
     def clean_up():
         """Delete all files except scripts."""
-        dir_names = [v for k, v in decu.config['Script'].items()
+        dir_names = [v.strip('/') for k, v in decu.config['Script'].items()
                      if k.endswith('_dir')]
-        dir_names.remove(decu.config['Script']['scripts_dir'])
+        dir_names.remove(decu.config['Script']['scripts_dir'].strip('/'))
         for dir_name in [d for d in dir_names if d in os.listdir(PROJECT_DIR)]:
             for file in os.listdir(os.path.join(PROJECT_DIR, dir_name)):
                 os.remove(os.path.join(PROJECT_DIR, dir_name, file))
