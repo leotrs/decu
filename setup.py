@@ -26,7 +26,7 @@ setup(
     packages=find_packages(),
     entry_points={'console_scripts': ['decu=decu.__main__:main']},
     zip_safe=False,
-    data_files=[('.', ['decu/decu.cfg'])],
+    data_files=[('', ['decu/decu.cfg'])],
     include_package_data=True,
     platforms='any'
 )
