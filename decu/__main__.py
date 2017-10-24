@@ -77,7 +77,7 @@ def _make_py_script(script, files, kwargs):
 
     cmd = Template(ins_cfg['py_cmd']).safe_substitute(
         dir=scr_cfg['scripts_dir'].strip('/'), script=script,
-        cls=class_name, cwd=os.getcwd(), files=files)
+        cls=class_name, files=files)
     cmd_noshow = Template(ins_cfg['py_cmd_noshow']).safe_substitute(
         dir=scr_cfg['scripts_dir'].strip('/'), script=script,
         cls=class_name, cwd=os.getcwd(), files=files)
