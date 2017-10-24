@@ -21,9 +21,8 @@ def test_local_override():
     with open(config_filename, 'w+') as cfg_file:
         cfg_file.write(config)
 
+    import decu
     try:
-        import decu
         assert decu.config['Script']['log_file'] == new_opt
-
     finally:
         os.remove(config_filename)
