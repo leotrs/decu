@@ -14,8 +14,8 @@ from datetime import datetime
 from collections import defaultdict
 from configparser import ConfigParser
 from multiprocessing import Pool, Value, Lock
-config = ConfigParser(interpolation=None)
 
+config = ConfigParser(interpolation=None)
 config.read([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
              os.path.expanduser('~/.decu.cfg'),
              os.path.join(os.getcwd(), 'decu.cfg')])
@@ -266,6 +266,9 @@ def figure(show=False, save=True):
             return temp.safe_substitute(fig_name=fig_name, outfile=outfile)
 
         import matplotlib.pyplot as plt
+        if 'DISPLAY' not in os.environ:
+            import matplotlib
+            matplotlib.use('Agg')
         @wraps(method)
         def decorated(*args, suffix=None, **kwargs):
             obj = args[0]
