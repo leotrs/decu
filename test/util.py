@@ -18,4 +18,4 @@ class TestScript(decu.Script):
         self.results_dir = str(tmpdir.mkdir(cfg['results_dir']))
         self.scripts_dir = str(tmpdir.mkdir(cfg['scripts_dir']))
         self.gendata_dir = str(tmpdir.mkdir(cfg['gendata_dir']))
-        super().__init__(str(tmpdir), __name__)
+        super().__init__(str(tmpdir))

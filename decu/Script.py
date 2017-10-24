@@ -42,16 +42,14 @@ class Script():
     log_fmt = config['Script']['log_fmt']
     time_fmt = config['Script']['time_fmt']
 
-    def __init__(self, working_dir, file_name):
+    def __init__(self, project_dir=None):
         self.start_time = datetime.now()
-        self.working_dir = working_dir
-        self.file_name = file_name
-        self.module_name, _ = os.path.splitext(file_name)
+        self.project_dir = os.getcwd() if project_dir is None else project_dir
 
         os.makedirs(self.logs_dir, exist_ok=True)
         logfile = Template(config['Script']['log_file']).safe_substitute(
-            time=self.start_time, module_name=self.module_name)
-        logfile = os.path.join(working_dir, self.logs_dir, logfile)
+            time=self.start_time, module_name=self.__module__)
+        logfile = os.path.join(self.project_dir, self.logs_dir, logfile)
         logging.basicConfig(level=logging.INFO, filename=logfile,
                             format=self.log_fmt, datefmt=self.time_fmt)
         self.logfile = logfile
@@ -60,14 +58,14 @@ class Script():
         temp = Template(config['Script']['result_file'])
         return os.path.join(self.results_dir,
                             temp.safe_substitute(time=self.start_time,
-                                                 module_name=self.module_name,
+                                                 module_name=self.__module__,
                                                  exp_name=exp_name, run=run, ext=ext))
 
     def make_figure_file(self, fig_name, suffix=None):
         temp = Template(config['Script']['figure_wo_suffix_file'] if suffix is None else
                         config['Script']['figure_w_suffix_file'])
         outfile = temp.safe_substitute(time=self.start_time,
-                                       module_name=self.module_name,
+                                       module_name=self.__module__,
                                        fig_name=fig_name, suffix=suffix,
                                        ext=self.figure_fmt)
         return os.path.join(self.figures_dir, outfile)
