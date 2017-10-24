@@ -24,7 +24,7 @@ def teardown():
         dir_names = [v for k, v in decu.config['Script'].items()
                      if k.endswith('_dir')]
         dir_names.remove(decu.config['Script']['scripts_dir'])
-        for dir_name in dir_names:
+        for dir_name in [d for d in dir_names if d in os.listdir(PROJECT_DIR)]:
             for file in os.listdir(os.path.join(PROJECT_DIR, dir_name)):
                 os.remove(os.path.join(PROJECT_DIR, dir_name, file))
 
