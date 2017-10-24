@@ -46,13 +46,46 @@ def test_exec_no_arg():
         check_call(['decu', 'exec'])
 
 
+def test_exec_no_class(tmpdir):
+    """`decu exec` on a file without a Script class should error out."""
+    main.init(str(tmpdir))
+    src_dir = config['Script']['scripts_dir']
+    filename = tmpdir.join(src_dir, 'empty.py')
+    with filename.open('w+') as file:
+        file.write('import decu\nclass MyScript():\n    pass')
+    with pytest.raises(CalledProcessError):
+        check_call(['decu', 'inspect', str(filename)])
+
+
+def test_exec_empty_file(tmpdir):
+    """`decu exec` on an empty file should error out."""
+    main.init(str(tmpdir))
+    src_dir = config['Script']['scripts_dir']
+    empty_fn = tmpdir.join(src_dir, 'empty.py')
+    empty_fn.open('w+').close()
+    with pytest.raises(CalledProcessError):
+        check_call(['decu', 'inspect', str(empty_fn)])
+
+
+def test_exec_nonexistent_file():
+    import os
+    non_existant = 'totally_non_existent_file.abc'
+    assert 'totally_non_existent_file.abc' not in os.listdir()
+    with pytest.raises(CalledProcessError):
+        check_call(['decu', 'inspect', non_existant])
+
+
 def test_inspect_wrong_args():
     """`decu inspect` with wrong arguments should give an error."""
     with pytest.raises(CalledProcessError):
         check_call(['decu', 'inspect'])
+
     with pytest.raises(CalledProcessError):
-        check_call(['decu', 'inspect', 'testscript/src/testscript.py', '--plot'])
+        check_call(['decu', 'inspect', 'testscript/src/testscript.py',
+                    '--plot'])
     with pytest.raises(CalledProcessError):
-        check_call(['decu', 'inspect', 'testscript/src/testscript.py', '--data'])
+        check_call(['decu', 'inspect', 'testscript/src/testscript.py',
+                    '--data'])
     with pytest.raises(CalledProcessError):
-        check_call(['decu', 'inspect', 'testscript/src/testscript.py', '--data', 'foo', '--bar'])
+        check_call(['decu', 'inspect', 'testscript/src/testscript.py',
+                    '--data', 'foo', '--bar'])
