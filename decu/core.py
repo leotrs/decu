@@ -1,6 +1,6 @@
 """
-Script.py
----------
+core.py
+-------
 
 Main decu classes and decorators.
 
@@ -9,6 +9,7 @@ Main decu classes and decorators.
 import os
 import logging
 from .config import config
+from .io import write_result
 from functools import wraps
 from datetime import datetime
 from collections import defaultdict
@@ -18,8 +19,7 @@ if 'DISPLAY' not in os.environ:
     matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-__all__ = ['Script', 'experiment', 'figure', 'run_parallel', 'read_result',
-           'DecuException']
+__all__ = ['Script', 'experiment', 'figure', 'run_parallel', 'DecuException']
 
 
 lock = Lock()
@@ -108,44 +108,6 @@ def get_parameters(method, param_name, args, kwargs):
     if 'self' in arg_values:
         del arg_values['self']
     return arg_values
-
-
-def write_result(result, outfile):
-    """Write result to disk.
-
-    Chose writing method according to result's type.
-
-    """
-    import numpy
-    import pandas
-    _type = type(result)
-
-    if _type == numpy.ndarray:
-        numpy.savetxt(outfile, numpy.array(result))
-    elif _type == pandas.DataFrame:
-        result.to_csv(outfile)
-    else:
-        numpy.savetxt(outfile, numpy.array(result))
-
-
-def read_result(infile):
-    """Read result from disk.
-
-    Chose reading method according to result's type.
-
-    """
-    import numpy
-    import pandas
-
-    _, ext = os.path.splitext(infile)
-    ext = ext.strip('.')
-
-    if ext == 'txt':
-        data = numpy.loadtxt(infile)
-    elif ext == 'csv':
-        data = pandas.read_csv(infile)
-
-    return data
 
 
 def experiment(data_param=None):
