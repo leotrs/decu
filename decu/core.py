@@ -92,7 +92,7 @@ def run_parallel(exp, params):
     return results
 
 
-def get_parameters(method, param_name, args, kwargs):
+def _get_parameters(method, param_name, args, kwargs):
     """Return the arguments passed to all experimental parameters.
 
     All method arguments that are not param_name are treated as
@@ -163,7 +163,7 @@ def experiment(data_param=None):
             # Make sure the output dir exists
             os.makedirs(obj.results_dir, exist_ok=True)
 
-            values = get_parameters(method, data_param, args, kwargs)
+            values = _get_parameters(method, data_param, args, kwargs)
             logging.info(exp_start_msg(decorated.run, values))
 
             start = time()
