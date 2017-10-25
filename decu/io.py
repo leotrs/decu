@@ -25,7 +25,7 @@ write_funcs.update({
 read_funcs = {
     'txt': lambda fn: np.loadtxt(fn),
     'csv': lambda fn: pd.read_csv(fn, index_col=0),
-    'gml': lambda fn: nx.read_gml(fn),
+    'gml': lambda fn: nx.read_gml(fn, destringizer=int),
 }
 
 extensions = defaultdict(lambda: 'txt')

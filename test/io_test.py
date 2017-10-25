@@ -40,5 +40,16 @@ def test_graph(tmpdir):
     test = lambda o: helper(o, 'graph', tmpdir, lambda a, b:
                             sorted(a.nodes()) == sorted(b.nodes()) and \
                             nx.isomorphism.is_isomorphic(a, b))
-    graph = nx.florentine_families_graph()
-    test(graph)
+    test(nx.florentine_families_graph())
+    test(nx.karate_club_graph())
+    test(nx.erdos_renyi_graph(100, 0.3))
+    test(nx.barabasi_albert_graph(100, 3))
+    test(nx.watts_strogatz_graph(100, 4, 0.2))
+
+
+def test_series(tmpdir):
+    """pd.Series should be handled correctly."""
+    import pandas as pd
+    test = lambda o: helper(o, 'series', tmpdir, lambda a, b: (a == b).all())
+    size = 100
+    test(pd.Series(random(size=size)))
