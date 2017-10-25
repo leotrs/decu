@@ -8,9 +8,8 @@ Main decu classes and decorators.
 
 import os
 import logging
-import configparser
+from .config import config
 from functools import wraps
-from string import Template
 from datetime import datetime
 from collections import defaultdict
 from multiprocessing import Pool, Value, Lock
@@ -19,30 +18,12 @@ if 'DISPLAY' not in os.environ:
     matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-__all__ = ['Script', 'config', 'experiment', 'figure', 'run_parallel', 'read_result']
-
-
-class DecuParser(configparser.ConfigParser):
-    def subs(self, section, option, **kwargs):
-        return Template(self.get(section, option)).safe_substitute(**kwargs)
-
-
-class DecuSectionProxy(configparser.SectionProxy):
-    def subs(self, option, **kwargs):
-        return Template(self.get(option)).safe_substitute(**kwargs)
-
-
-configparser.SectionProxy = DecuSectionProxy
-
-
-config = DecuParser(interpolation=None)
-config.read([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
-             os.path.expanduser('~/.decu.cfg'),
-             os.path.join(os.getcwd(), 'decu.cfg')])
+__all__ = ['Script', 'experiment', 'figure', 'run_parallel', 'read_result']
 
 
 lock = Lock()
 runs = defaultdict(lambda: Value('i', 0))
+
 
 class Script():
     """Base class for experimental computation scripts."""
