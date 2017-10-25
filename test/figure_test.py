@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 
 def test_save_false(tmpdir):
-    """Test the behavior of @figure when save=False."""
+    """With save=False, @figure should not write to disk."""
     class TestSaveFalse(util.TestScript):
         @figure(save=False)
         def plot(self):
@@ -30,7 +30,7 @@ def test_save_false(tmpdir):
 
 
 def test_save_true(tmpdir):
-    """Test the behavior of @figure when save=True."""
+    """With save=True, @figure should write to disk."""
     class TestSaveTrue(util.TestScript):
         @figure(save=True)
         def plot(self):
@@ -46,7 +46,7 @@ def test_save_true(tmpdir):
 
 
 def test_suffix(tmpdir):
-    """Test the suffix argument of @figure."""
+    """@figure-decorated methods should accept a suffix argument."""
     class TestSuffix(util.TestScript):
         @figure(save=True)
         def plot(self):
