@@ -8,23 +8,38 @@ Main decu classes and decorators.
 
 import os
 import logging
+import configparser
 from functools import wraps
 from string import Template
 from datetime import datetime
 from collections import defaultdict
-from configparser import ConfigParser
 from multiprocessing import Pool, Value, Lock
 if 'DISPLAY' not in os.environ:
     import matplotlib
     matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-config = ConfigParser(interpolation=None)
+__all__ = ['Script', 'config', 'experiment', 'figure', 'run_parallel', 'read_result']
+
+
+class DecuParser(configparser.ConfigParser):
+    def subs(self, section, option, **kwargs):
+        return Template(self.get(section, option)).safe_substitute(**kwargs)
+
+
+class DecuSectionProxy(configparser.SectionProxy):
+    def subs(self, option, **kwargs):
+        return Template(self.get(option)).safe_substitute(**kwargs)
+
+
+configparser.SectionProxy = DecuSectionProxy
+
+
+config = DecuParser(interpolation=None)
 config.read([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
              os.path.expanduser('~/.decu.cfg'),
              os.path.join(os.getcwd(), 'decu.cfg')])
 
-__all__ = ['Script', 'config', 'experiment', 'figure', 'run_parallel', 'read_result']
 
 lock = Lock()
 runs = defaultdict(lambda: Value('i', 0))
@@ -48,27 +63,22 @@ class Script():
         self.module = self.__module__ if module is None else module
 
         os.makedirs(self.logs_dir, exist_ok=True)
-        logfile = Template(config['Script']['log_file']).safe_substitute(
-            time=self.start_time, module_name=self.module)
+        logfile = config['Script'].subs('log_file', time=self.start_time, module_name=self.module)
         logfile = os.path.join(self.project_dir, self.logs_dir, logfile)
         logging.basicConfig(level=logging.INFO, filename=logfile,
                             format=self.log_fmt, datefmt=self.time_fmt)
         self.logfile = logfile
 
     def make_result_file(self, exp_name, run, ext='txt'):
-        temp = Template(config['Script']['result_file'])
-        return os.path.join(self.results_dir,
-                            temp.safe_substitute(time=self.start_time,
-                                                 module_name=self.module,
-                                                 exp_name=exp_name, run=run, ext=ext))
+        return os.path.join(self.results_dir, config['Script'].subs(
+            'result_file', time=self.start_time, module_name=self.module,
+            exp_name=exp_name, run=run, ext=ext))
 
     def make_figure_file(self, fig_name, suffix=None):
-        temp = Template(config['Script']['figure_wo_suffix_file'] if suffix is None else
-                        config['Script']['figure_w_suffix_file'])
-        outfile = temp.safe_substitute(time=self.start_time,
-                                       module_name=self.module,
-                                       fig_name=fig_name, suffix=suffix,
-                                       ext=self.figure_fmt)
+        opt = 'figure_wo_suffix_file' if suffix is None else 'figure_w_suffix_file'
+        outfile = config['Script'].subs(
+            opt, time=self.start_time, module_name=self.module, fig_name=fig_name,
+            suffix=suffix, ext=self.figure_fmt)
         return os.path.join(self.figures_dir, outfile)
 
 
@@ -184,18 +194,15 @@ def experiment(data_param=None):
         cfg = config['experiment']
 
         def exp_start_msg(run, params):
-            temp = Template(cfg['start_msg'])
-            return temp.safe_substitute(exp_name=exp_name, run=run, params=params)
+            return cfg.subs('start_msg', exp_name=exp_name, run=run, params=params)
 
         def exp_end_msg(run, params, elapsed):
-            temp = Template(cfg['end_msg'])
-            return temp.safe_substitute(exp_name=exp_name, params=params,
-                                        elapsed=round(elapsed, 5), run=run)
+            return cfg.subs('end_msg', exp_name=exp_name, params=params,
+                            elapsed=round(elapsed, 5), run=run)
 
         def wrote_results_msg(run, outfile, params):
-            temp = Template(cfg['write_msg'])
-            return temp.safe_substitute(exp_name=exp_name, params=params,
-                                        outfile=outfile, run=run)
+            return cfg.subs('write_msg', exp_name=exp_name, params=params,
+                            outfile=outfile, run=run)
 
         from time import time
         @wraps(method)
@@ -265,8 +272,7 @@ def figure(show=False, save=True):
         fig_name = method.__name__
 
         def wrote_fig_msg(outfile):
-            temp = Template(config['figure']['write'])
-            return temp.safe_substitute(fig_name=fig_name, outfile=outfile)
+            return config['figure'].subs('write', fig_name=fig_name, outfile=outfile)
 
         @wraps(method)
         def decorated(*args, suffix=None, **kwargs):
