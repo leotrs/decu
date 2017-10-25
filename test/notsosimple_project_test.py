@@ -9,31 +9,12 @@ Run `decu` on the mock project notsosimple_project.
 import os
 import decu
 import pytest
-from random import choice
 from subprocess import call
+from util import make_teardown_fixture
 
 PROJECT_DIR = 'notsosimple_project/'
-
-
-# Finalization code. See
-# docs.pytest.org/en/latest/fixture.html#fixture-finalization-executing-teardown-code
-@pytest.fixture(scope='module', autouse=True)
-def teardown():
-    """Guarantee a clean slate before and after all tests in this module."""
-    def clean_up():
-        """Delete all files except scripts."""
-        dir_names = [v.strip('/') for k, v in decu.config['Script'].items()
-                     if k.endswith('_dir')]
-        dir_names.remove(decu.config['Script']['scripts_dir'].strip('/'))
-        for dir_name in [d for d in dir_names if d in os.listdir(PROJECT_DIR)]:
-            for file in os.listdir(os.path.join(PROJECT_DIR, dir_name)):
-                os.remove(os.path.join(PROJECT_DIR, dir_name, file))
-
-    clean_up()
-    os.chdir(PROJECT_DIR)
-    yield None
-    os.chdir('..')
-    clean_up()
+teardown = pytest.fixture(scope='module', autouse=True)(
+    make_teardown_fixture(PROJECT_DIR))
 
 
 def test_exec():
