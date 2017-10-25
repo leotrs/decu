@@ -114,8 +114,11 @@ def inspect(files, **kwargs):
             return 'File {} not found.'.format(file)
 
     script_name = _get_script_name(files)
-    if not os.path.exists(script_name + '.py'):
-        return 'File {} not found.'.format(script_name + '.py')
+    script_fullname = os.path.join(decu.config['Script']['scripts_dir'],
+                                   script_name)
+    script_fullname += '.py'
+    if not os.path.exists(script_fullname):
+        return 'File {} not found.'.format(script_fullname)
 
     cmd, cmd_show = _make_py_script(script_name, files, kwargs)
     print(cmd_show)
