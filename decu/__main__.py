@@ -29,7 +29,12 @@ def exec_script(files):
         module_name, _ = os.path.splitext(module_file)
         project_dir, _ = os.path.split(module_path)
         sys.path.append(os.path.abspath(module_path))
-        module = import_module(module_name)
+        try:
+            module = import_module(module_name)
+        except ImportError:
+            print('File {} not found.'.format(module_file))
+            sys.exit(1)
+
         script = _extract_script_class(module)()
         script.main()
         logger = logging.getLogger()

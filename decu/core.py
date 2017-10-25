@@ -18,11 +18,16 @@ if 'DISPLAY' not in os.environ:
     matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-__all__ = ['Script', 'experiment', 'figure', 'run_parallel', 'read_result']
+__all__ = ['Script', 'experiment', 'figure', 'run_parallel', 'read_result',
+           'DecuException']
 
 
 lock = Lock()
 runs = defaultdict(lambda: Value('i', 0))
+
+
+class DecuException(Exception):
+    pass
 
 
 class Script():
