@@ -11,7 +11,7 @@ import os
 __all__ = ['write_result', 'read_result']
 
 
-def write_result(result, outfile):
+def write_result(result, basename):
     """Write result to disk.
 
     Chose writing method according to result's type.
@@ -22,11 +22,11 @@ def write_result(result, outfile):
     _type = type(result)
 
     if _type == numpy.ndarray:
-        numpy.savetxt(outfile, numpy.array(result))
+        numpy.savetxt(basename, numpy.array(result))
     elif _type == pandas.DataFrame:
-        result.to_csv(outfile)
+        result.to_csv(basename)
     else:
-        numpy.savetxt(outfile, numpy.array(result))
+        numpy.savetxt(basename, numpy.array(result))
 
 
 def read_result(infile):
