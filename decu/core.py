@@ -9,7 +9,7 @@ Main decu classes and decorators.
 import os
 import logging
 from .config import config
-from .io import write_result
+from .io import write
 from functools import wraps
 from datetime import datetime
 from collections import defaultdict
@@ -171,7 +171,7 @@ def experiment(data_param=None):
             end = time()
             logging.info(exp_end_msg(decorated.run, values, end - start))
             basename = obj.make_result_basename(exp_name, decorated.run)
-            write_result(result, basename)
+            write(result, basename)
             logging.info(wrote_results_msg(decorated.run, basename, values))
 
             return result

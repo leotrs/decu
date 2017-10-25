@@ -12,7 +12,7 @@ import pandas as pd
 import networkx as nx
 from collections import defaultdict
 
-__all__ = ['write_result', 'read_result']
+__all__ = ['write', 'read']
 
 write_funcs = defaultdict(lambda:
                           lambda fn, res: np.savetxt(fn, np.array(res)))
@@ -41,13 +41,13 @@ def make_fullname(basename, _type=None):
     return '{}.{}'.format(basename, extensions[_type])
 
 
-def write_result(result, basename):
+def write(result, basename):
     """Write result to disk."""
     filename = make_fullname(basename, type(result))
     write_funcs[type(result)](filename, result)
 
 
-def read_result(infile):
+def read(infile):
     """Read result from disk."""
     _, ext = os.path.splitext(infile)
     ext = ext.strip('.')

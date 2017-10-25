@@ -8,7 +8,7 @@ Tests for the decu.io module.
 
 import os
 from numpy.random import random, randint
-from decu.io import write_result, read_result, make_fullname
+from decu.io import write, read, make_fullname
 
 
 def helper(obj, name, tmpdir, comp=None):
@@ -17,10 +17,10 @@ def helper(obj, name, tmpdir, comp=None):
     basename = tmpdir.join(name)
     fullname = make_fullname(basename, type(obj))
     assert fullname not in tmpdir.listdir()
-    write_result(obj, basename)
+    write(obj, basename)
     assert fullname in tmpdir.listdir()
-    read = read_result(fullname)
-    assert comp(read, obj)
+    loaded = read(fullname)
+    assert comp(loaded, obj)
     os.remove(fullname)
 
 
