@@ -107,7 +107,16 @@ def inspect(files, **kwargs):
     from subprocess import call
     from tempfile import NamedTemporaryFile
 
+    for file in files:
+        if not os.path.exists(file):
+            print('File {} not found.'.format(file))
+            sys.exit(1)
+
     script_name = _get_script_name(files)
+    if not os.path.exists(script_name + '.py'):
+        print('File {} not found.'.format(script_name + '.py'))
+        sys.exit(1)
+
     cmd, cmd_show = _make_py_script(script_name, files, kwargs)
     print(cmd_show)
 
