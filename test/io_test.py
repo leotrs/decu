@@ -53,3 +53,17 @@ def test_series(tmpdir):
     test = lambda o: helper(o, 'series', tmpdir, lambda a, b: (a == b).all())
     size = 100
     test(pd.Series(random(size=size)))
+
+
+def test_dataframe(tmpdir):
+    """pd.DataFrame should be handled correctly."""
+    import pandas as pd
+    test = lambda o: helper(o, 'frame', tmpdir, lambda a, b:
+                            len(a) == len(b) and \
+                            sorted(a.columns) == sorted(b.columns) and \
+                            len(pd.merge(a, b,
+                                         on=list(a.columns),
+                                         how='inner')) == len(a))
+    size = 100
+    test(pd.DataFrame({str(idx): randint(1, 10*size, size=size)
+                       for idx in range(size)}))
