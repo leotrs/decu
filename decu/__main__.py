@@ -32,8 +32,7 @@ def exec_script(files):
         try:
             module = import_module(module_name)
         except ImportError:
-            print('File {} not found.'.format(module_file))
-            sys.exit(1)
+            return 'File {} not found.'.format(module_file)
 
         script = _extract_script_class(module)()
         script.main()
@@ -42,20 +41,23 @@ def exec_script(files):
             handler.flush()
             logger.removeHandler(handler)
 
+    return 0
+
 
 def init(directory):
     """Initialize the directory for a decu project."""
+    cfg = decu.config['Script']
     mkdir = lambda name: os.makedirs(os.path.join(directory, name), exist_ok=True)
-    for dir_name in [key for key in decu.config['Script'] if key.endswith('_dir')]:
-        mkdir(decu.config['Script'][dir_name])
+    for dir_name in [key for key in cfg if key.endswith('_dir')]:
+        mkdir(cfg[dir_name])
     print('Initialized empty decu project directory in {}'.format(directory))
+    return 0
 
 
 def _parse_inspect_opts(opts):
     """Parse the remainder of the options given to decu inspect."""
     if len(opts) % 2 != 0:
-        print('additional options need to come in pairs')
-        sys.exit(2)
+        sys.exit('Additional options need to come in pairs.')
     return {name.strip('-'): path for name, path in
             [opts[i:i + 2] for i in range(0, len(opts), 2)]}
 
@@ -109,13 +111,11 @@ def inspect(files, **kwargs):
 
     for file in files:
         if not os.path.exists(file):
-            print('File {} not found.'.format(file))
-            sys.exit(1)
+            return 'File {} not found.'.format(file)
 
     script_name = _get_script_name(files)
     if not os.path.exists(script_name + '.py'):
-        print('File {} not found.'.format(script_name + '.py'))
-        sys.exit(1)
+        return 'File {} not found.'.format(script_name + '.py')
 
     cmd, cmd_show = _make_py_script(script_name, files, kwargs)
     print(cmd_show)
@@ -127,6 +127,8 @@ def inspect(files, **kwargs):
         tmp.read()
         cli_cmd = ['ipython', tmp.name] + cli_cmd_opts
         call(cli_cmd)
+
+    return 0
 
 
 def main():
@@ -154,13 +156,13 @@ def main():
         sys.exit(0)
 
     elif args.command == 'exec':
-        exec_script(args.files)
+        sys.exit(exec_script(args.files))
 
     elif args.command == 'init':
-        init(os.getcwd())
+        sys.exit(init(os.getcwd()))
 
     elif args.command == 'inspect':
-        inspect(args.files, **_parse_inspect_opts(args.opts))
+        sys.exit(inspect(args.files, **_parse_inspect_opts(args.opts)))
 
 
 if __name__ == "__main__":
