@@ -55,12 +55,12 @@ class Script():
                             format=self.log_fmt, datefmt=self.time_fmt)
         self.logfile = logfile
 
-    def make_result_file(self, exp_name, run, ext='txt'):
+    def make_result_basename(self, exp_name, run, ext='txt'):
         return os.path.join(self.results_dir, config['Script'].subs(
             'result_file', time=self.start_time, module_name=self.module,
             exp_name=exp_name, run=run, ext=ext))
 
-    def make_figure_file(self, fig_name, suffix=None):
+    def make_figure_basename(self, fig_name, suffix=None):
         opt = 'figure_wo_suffix_file' if suffix is None else 'figure_w_suffix_file'
         outfile = config['Script'].subs(
             opt, time=self.start_time, module_name=self.module, fig_name=fig_name,
@@ -170,9 +170,9 @@ def experiment(data_param=None):
             result = method(*args, **kwargs)
             end = time()
             logging.info(exp_end_msg(decorated.run, values, end - start))
-            outfile = obj.make_result_file(exp_name, decorated.run)
-            write_result(result, outfile)
-            logging.info(wrote_results_msg(decorated.run, outfile, values))
+            basename = obj.make_result_basename(exp_name, decorated.run)
+            write_result(result, basename)
+            logging.info(wrote_results_msg(decorated.run, basename, values))
 
             return result
 
@@ -231,7 +231,7 @@ def figure(show=False, save=True):
             method(*args, **kwargs)
             fig = plt.gcf()
             if save:
-                outfile = obj.make_figure_file(fig_name, suffix)
+                outfile = obj.make_figure_basename(fig_name, suffix)
                 fig.savefig(outfile)
                 logging.info(wrote_fig_msg(outfile))
             if show:

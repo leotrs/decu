@@ -22,7 +22,7 @@ def test_write(tmpdir):
 
     script = TestWrite(tmpdir)
     pval = 4
-    result_filename = os.path.basename(script.make_result_file('exp', 0))
+    result_filename = os.path.basename(script.make_result_basename('exp', 0))
 
     assert result_filename not in os.listdir(script.results_dir)
     script.exp(range(100), pval)
@@ -39,7 +39,7 @@ def test_multiple_params(tmpdir):
     script = TestWrite(tmpdir)
     p1val = 4
     p2val = 10
-    result_filename = os.path.basename(script.make_result_file('exp', 0))
+    result_filename = os.path.basename(script.make_result_basename('exp', 0))
 
     assert result_filename not in os.listdir(script.results_dir)
     script.exp(range(100), p1val, p2val)

@@ -22,7 +22,7 @@ def test_save_false(tmpdir):
             plt.plot(range(100), [x**2 for x in range(100)])
 
     script = TestSaveFalse(tmpdir)
-    fig_filename = basename(script.make_figure_file('plot'))
+    fig_filename = basename(script.make_figure_basename('plot'))
 
     assert fig_filename not in listdir(script.figures_dir)
     script.plot()
@@ -38,7 +38,7 @@ def test_save_true(tmpdir):
             plt.plot(range(100), [x**2 for x in range(100)])
 
     script = TestSaveTrue(tmpdir)
-    fig_filename = basename(script.make_figure_file('plot'))
+    fig_filename = basename(script.make_figure_basename('plot'))
 
     assert fig_filename not in listdir(script.figures_dir)
     script.plot()
@@ -55,7 +55,7 @@ def test_suffix(tmpdir):
 
     script = TestSuffix(tmpdir)
     suffix = 'test_suffix'
-    fig_filename = basename(script.make_figure_file('plot', suffix))
+    fig_filename = basename(script.make_figure_basename('plot', suffix))
 
     assert fig_filename not in listdir(script.figures_dir)
     script.plot(suffix=suffix)
