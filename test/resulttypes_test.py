@@ -9,8 +9,9 @@ Test reading and writing of different (result) file types.
 import util
 import numpy as np
 from os import listdir
-from os.path import basename
+from os.path import basename, join
 from decu import experiment, read_result
+from decu.io import make_fullname
 
 
 def test_array(tmpdir):
@@ -22,14 +23,11 @@ def test_array(tmpdir):
 
     script = TestArray(tmpdir)
     size = 10
-    result_path = script.make_result_basename('exp', 0)
-    result_filename = basename(result_path)
-
-    assert result_filename not in listdir(script.results_dir)
+    filename = make_fullname(basename(script.make_result_basename('exp', 0)))
+    assert filename not in listdir(script.results_dir)
     result = script.exp(size)
-    assert result_filename in listdir(script.results_dir)
-
+    assert filename in listdir(script.results_dir)
     assert isinstance(result, np.ndarray)
-    loaded = read_result(result_path)
+    loaded = read_result(join(script.results_dir, filename))
     assert isinstance(loaded, np.ndarray)
     assert (loaded == result).all()

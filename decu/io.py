@@ -7,8 +7,29 @@ Reading and writing functionality for decu.
 """
 
 import os
+import numpy as np
+import pandas as pd
+from collections import defaultdict
 
 __all__ = ['write_result', 'read_result']
+
+write_funcs = defaultdict(lambda:
+                          lambda fn, res: np.savetxt(fn, np.array(res)))
+write_funcs.update({
+    np.ndarray: lambda fn, res: np.savetxt(fn, res),
+    pd.DataFrame: lambda fn, res: res.to_csv(fn)
+})
+
+extensions = defaultdict(lambda: 'txt')
+extensions.update({
+    np.ndarray: 'txt',
+    pd.DataFrame: 'csv'
+})
+
+
+def make_fullname(basename, _type=None):
+    """Return the basename plus an appropriate extension for the type."""
+    return '{}.{}'.format(basename, extensions[_type])
 
 
 def write_result(result, basename):
@@ -17,16 +38,8 @@ def write_result(result, basename):
     Chose writing method according to result's type.
 
     """
-    import numpy
-    import pandas
-    _type = type(result)
-
-    if _type == numpy.ndarray:
-        numpy.savetxt(basename, numpy.array(result))
-    elif _type == pandas.DataFrame:
-        result.to_csv(basename)
-    else:
-        numpy.savetxt(basename, numpy.array(result))
+    filename = make_fullname(basename, type(result))
+    write_funcs[type(result)](filename, result)
 
 
 def read_result(infile):

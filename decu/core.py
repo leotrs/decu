@@ -55,10 +55,10 @@ class Script():
                             format=self.log_fmt, datefmt=self.time_fmt)
         self.logfile = logfile
 
-    def make_result_basename(self, exp_name, run, ext='txt'):
+    def make_result_basename(self, exp_name, run):
         return os.path.join(self.results_dir, config['Script'].subs(
             'result_file', time=self.start_time, module_name=self.module,
-            exp_name=exp_name, run=run, ext=ext))
+            exp_name=exp_name, run=run))
 
     def make_figure_basename(self, fig_name, suffix=None):
         opt = 'figure_wo_suffix_file' if suffix is None else 'figure_w_suffix_file'

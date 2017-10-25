@@ -6,11 +6,12 @@ Test the @experiment decorator.
 
 """
 
-import os
+from os import listdir
+from os.path import basename
 import util
 import numpy as np
 from decu import experiment
-import matplotlib.pyplot as plt
+from decu.io import make_fullname
 
 
 def test_write(tmpdir):
@@ -22,11 +23,12 @@ def test_write(tmpdir):
 
     script = TestWrite(tmpdir)
     pval = 4
-    result_filename = os.path.basename(script.make_result_basename('exp', 0))
+    result_filename = basename(script.make_result_basename('exp', 0))
+    fullname = make_fullname(result_filename)
 
-    assert result_filename not in os.listdir(script.results_dir)
+    assert fullname not in listdir(script.results_dir)
     script.exp(range(100), pval)
-    assert result_filename in os.listdir(script.results_dir)
+    assert fullname in listdir(script.results_dir)
 
 
 def test_multiple_params(tmpdir):
@@ -39,8 +41,8 @@ def test_multiple_params(tmpdir):
     script = TestWrite(tmpdir)
     p1val = 4
     p2val = 10
-    result_filename = os.path.basename(script.make_result_basename('exp', 0))
+    filename = basename(make_fullname(script.make_result_basename('exp', 0)))
 
-    assert result_filename not in os.listdir(script.results_dir)
+    assert filename not in listdir(script.results_dir)
     script.exp(range(100), p1val, p2val)
-    assert result_filename in os.listdir(script.results_dir)
+    assert filename in listdir(script.results_dir)
