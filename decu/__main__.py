@@ -69,31 +69,38 @@ def _get_script_name(files):
     search = re.sub(r'\$\{.*?\}', '(.*?)',
                     re.sub(r'\.', r'\.', decu.config['Script']['result_file']))
     search = r'^{}$'.format(search)
-    return re.match(search, filename).group(2)
+
+    match = re.match(search, filename)
+
+    if match is None:
+        raise decu.DecuException('module not found')
+    else:
+        return re.match(search, filename).group(2)
 
 
 def _make_py_script(script, files, command, kwargs):
     """Build the script that will be run within iPython."""
-    from string import Template
     scr_cfg = decu.config['Script']
     ins_cfg = decu.config['inspect']
 
-    sys.path.append(scr_cfg['scripts_dir'])
-    module = import_module(script)
-    class_name = _extract_script_class(module).__name__
+    cmd = ins_cfg['py_cmd_imports']
+    if script is not None:
+        sys.path.append(scr_cfg['scripts_dir'])
+        module = import_module(script)
+        class_name = _extract_script_class(module).__name__
+        cmd += ins_cfg.subs('py_cmd_script',
+                            dir=scr_cfg['scripts_dir'].strip('/'),
+                            script=script,
+                            cls=class_name)
 
-    cmd = Template(ins_cfg['py_cmd']).safe_substitute(
-        dir=scr_cfg['scripts_dir'].strip('/'), script=script,
-        cls=class_name, files=files)
-    cmd_noshow = Template(ins_cfg['py_cmd_noshow']).safe_substitute(
-        dir=scr_cfg['scripts_dir'].strip('/'), script=script,
-        cls=class_name, cwd=os.getcwd(), files=files)
+    cmd_noshow = ins_cfg.subs('py_cmd_noshow', files=files)
+
     cmd_full = '\n'.join([cmd, cmd_noshow] +
                          ['{} = np.loadtxt("{}")'.format(name, path)
                           for name, path in kwargs.items()])
 
     cmd_show = cmd + '\n' + \
-        '\n'.join(Template(ins_cfg['noshow_replace']).safe_substitute(var=name)
+        '\n'.join(ins_cfg.subs('noshow_replace', var=name)
                   for name in ['result'] + list(kwargs.keys()))
     cmd_show = '>>> ' + re.sub(r'\n(.)', r'\n>>> \1', cmd_show)
 
@@ -117,14 +124,18 @@ def inspect(files, command=None, **kwargs):
         if not os.path.exists(file):
             return 'File {} not found.'.format(file)
 
-    script_name = _get_script_name(files)
-    script_fullname = os.path.join(decu.config['Script']['scripts_dir'],
-                                   script_name)
-    script_fullname += '.py'
-    if not os.path.exists(script_fullname):
-        return 'File {} not found.'.format(script_fullname)
+    try:
+        script_name = _get_script_name(files)
+        script_fullname = os.path.join(decu.config['Script']['scripts_dir'],
+                                       script_name)
+        script_fullname += '.py'
+        if not os.path.exists(script_fullname):
+            return 'File {} not found.'.format(script_fullname)
+        cmd, cmd_show = _make_py_script(script_name, files, command, kwargs)
 
-    cmd, cmd_show = _make_py_script(script_name, files, command, kwargs)
+    except decu.DecuException:
+        cmd, cmd_show = _make_py_script(None, files, command, kwargs)
+
     print(cmd_show)
 
     cli_cmd_opts = ['--no-banner']

@@ -7,6 +7,7 @@ Test the console scripts.
 """
 
 import pytest
+import decu
 from decu import config
 from decu import __main__ as main
 from subprocess import check_call, CalledProcessError
@@ -92,3 +93,25 @@ def test_inspect_wrong_args():
     with pytest.raises(CalledProcessError):
         check_call(['decu', 'inspect', 'testscript/src/testscript.py',
                     '--data', 'foo', '--bar'])
+
+
+def test_inspect_c_flag():
+    """`decu inspect` should execute the command passed as -c flag."""
+    import os
+    import numpy as np
+    arr = np.random.random(size=100)
+
+    fullname = decu.io.make_fullname('array', type(arr))
+    assert fullname not in os.listdir()
+    decu.io.write(arr, 'array')
+    assert fullname in os.listdir()
+
+    exit_code = check_call(['decu', 'inspect', '-c',
+                            'decu.io.write(result + 2, "array2")', fullname])
+    assert exit_code == 0
+
+    loaded = decu.io.read(decu.io.make_fullname('array2', type(arr)))
+    assert (loaded == arr + 2).all()
+
+    os.remove(fullname)
+    os.remove('array2.txt')
