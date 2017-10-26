@@ -67,3 +67,20 @@ def test_dataframe(tmpdir):
     size = 100
     test(pd.DataFrame({str(idx): randint(1, 10*size, size=size)
                        for idx in range(size)}))
+
+
+def test_int(tmpdir):
+    """ints should be handled correctly."""
+    for _ in range(100):
+        helper(randint(0, 10000), 'integer', tmpdir)
+
+
+def test_float(tmpdir):
+    """floats should be handled correctly."""
+    for _ in range(100):
+        helper(round(random(), 5), 'float', tmpdir)
+
+
+# def test_dict(tmpdir):
+#     for _ in range(100):
+#         helper({idx: round(random(), 5) for idx in range(100)}, 'dict', tmpdir)
