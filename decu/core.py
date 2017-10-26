@@ -49,7 +49,8 @@ class Script():
         self.module = self.__module__ if module is None else module
 
         os.makedirs(self.logs_dir, exist_ok=True)
-        logfile = config['Script'].subs('log_file', time=self.start_time, module_name=self.module)
+        logfile = config['Script'].subs('log_file', time=self.start_time,
+                                        module_name=self.module)
         logfile = os.path.join(self.project_dir, self.logs_dir, logfile)
         logging.basicConfig(level=logging.INFO, filename=logfile,
                             format=self.log_fmt, datefmt=self.time_fmt)
@@ -61,10 +62,11 @@ class Script():
             exp_name=exp_name, run=run))
 
     def make_figure_basename(self, fig_name, suffix=None):
-        opt = 'figure_wo_suffix_file' if suffix is None else 'figure_w_suffix_file'
+        opt = 'figure_wo_suffix_file' if suffix is None \
+              else 'figure_w_suffix_file'
         outfile = config['Script'].subs(
-            opt, time=self.start_time, module_name=self.module, fig_name=fig_name,
-            suffix=suffix, ext=self.figure_fmt)
+            opt, time=self.start_time, module_name=self.module,
+            fig_name=fig_name, suffix=suffix, ext=self.figure_fmt)
         return os.path.join(self.figures_dir, outfile)
 
 
@@ -87,7 +89,8 @@ def run_parallel(exp, params):
         global lock, runs
         lock, runs = args
 
-    with Pool(initializer=init, initargs=(lock, runs), maxtasksperchild=100) as pool:
+    with Pool(initializer=init, initargs=(lock, runs),
+              maxtasksperchild=100) as pool:
         results = pool.starmap(exp, params)
     return results
 
@@ -142,7 +145,8 @@ def experiment(data_param=None):
         cfg = config['experiment']
 
         def exp_start_msg(run, params):
-            return cfg.subs('start_msg', exp_name=exp_name, run=run, params=params)
+            return cfg.subs('start_msg', exp_name=exp_name, run=run,
+                            params=params)
 
         def exp_end_msg(run, params, elapsed):
             return cfg.subs('end_msg', exp_name=exp_name, params=params,
@@ -153,6 +157,7 @@ def experiment(data_param=None):
                             outfile=outfile, run=run)
 
         from time import time
+
         @wraps(method)
         def decorated(*args, **kwargs):
             obj = args[0]
@@ -179,7 +184,6 @@ def experiment(data_param=None):
         return decorated
 
     return _experiment
-
 
 
 def figure(show=False, save=True):
@@ -220,7 +224,8 @@ def figure(show=False, save=True):
         fig_name = method.__name__
 
         def wrote_fig_msg(outfile):
-            return config['figure'].subs('write', fig_name=fig_name, outfile=outfile)
+            return config['figure'].subs('write', fig_name=fig_name,
+                                         outfile=outfile)
 
         @wraps(method)
         def decorated(*args, suffix=None, **kwargs):
@@ -236,7 +241,6 @@ def figure(show=False, save=True):
                 logging.info(wrote_fig_msg(outfile))
             if show:
                 plt.show()
-
 
         return decorated
 

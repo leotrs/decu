@@ -14,6 +14,7 @@ def get_requirements(suffix=''):
         result = file.read().splitlines()
     return result
 
+
 setup(
     name='decu',
     version='0.0.1',

@@ -38,6 +38,7 @@ class TestScript(Script):
         result1 = self.exp(data, param=4, param2=10)
         self.plot_result(data, result1)
 
-        param_list = [(data, x, y) for x, y in zip(np.arange(5), np.arange(5, 10))]
+        param_list = [(data, x, y) for x, y in
+                      zip(np.arange(5), np.arange(5, 10))]
         result2 = run_parallel(self.exp, param_list)
         self.plot_many_results(data, result2, suffix='parallel')

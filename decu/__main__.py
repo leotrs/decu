@@ -152,14 +152,16 @@ def inspect(files, command=None, **kwargs):
 
 def setup_parser():
     import argparse
-    parser = argparse.ArgumentParser(description='Experimental computation utilities.')
+    parser = argparse.ArgumentParser(description='Experimental computation '
+                                     'utilities.')
     subparsers = parser.add_subparsers(help='command', dest='command')
 
     parser_init = subparsers.add_parser('init', help='initialize a decu '
                                         'project under this directory')
 
     parser_exec = subparsers.add_parser('exec', help='run a script with decu')
-    parser_exec.add_argument('files', nargs='+', help='the script(s) to be run')
+    parser_exec.add_argument('files', nargs='+', help='the script(s) '
+                             'to be run')
 
     parser_inspect = subparsers.add_parser('inspect', help='inspect results')
     parser_inspect.add_argument('files', nargs='+', help='files to be'

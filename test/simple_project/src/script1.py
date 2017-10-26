@@ -2,6 +2,7 @@ import decu
 import logging
 import numpy as np
 
+
 class Script(decu.Script):
     @decu.experiment(data_param='d')
     def exp(self, d, p, p2):

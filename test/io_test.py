@@ -38,7 +38,7 @@ def test_graph(tmpdir):
     """nx.Graph should be handled correctly."""
     import networkx as nx
     test = lambda o: helper(o, 'graph', tmpdir, lambda a, b:
-                            sorted(a.nodes()) == sorted(b.nodes()) and \
+                            sorted(a.nodes()) == sorted(b.nodes()) and
                             nx.isomorphism.is_isomorphic(a, b))
     test(nx.florentine_families_graph())
     test(nx.karate_club_graph())
@@ -59,8 +59,8 @@ def test_dataframe(tmpdir):
     """pd.DataFrame should be handled correctly."""
     import pandas as pd
     test = lambda o: helper(o, 'frame', tmpdir, lambda a, b:
-                            len(a) == len(b) and \
-                            sorted(a.columns) == sorted(b.columns) and \
+                            len(a) == len(b) and
+                            sorted(a.columns) == sorted(b.columns) and
                             len(pd.merge(a, b,
                                          on=list(a.columns),
                                          how='inner')) == len(a))
