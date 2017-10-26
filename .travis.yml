@@ -8,6 +8,4 @@ install:
 before_script: cd test/
 script:
   - pytest config_test.py
-  - pytest simple_project_test.py::test_exec_multiple_args
-  - pytest simple_project_test.py::test_exec_single_arg
   - pytest -k "not isolated"

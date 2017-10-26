@@ -17,7 +17,6 @@ teardown = pytest.fixture(scope='function', autouse=True)(
     make_teardown_fixture(PROJECT_DIR))
 
 
-@pytest.mark.isolated
 def test_exec_single_arg():
     """`decu exec` should accept one single argument."""
     cfg = decu.config['Script']
@@ -26,7 +25,6 @@ def test_exec_single_arg():
     assert len(os.listdir(cfg['results_dir'])) == 1
 
 
-@pytest.mark.isolated
 def test_exec_multiple_args():
     """`decu exec` on two equal scripts should generate two equal log files.
 
