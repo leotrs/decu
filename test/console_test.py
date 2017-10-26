@@ -67,12 +67,15 @@ def test_exec_empty_file(tmpdir):
         check_call(['decu', 'inspect', str(empty_fn)])
 
 
-def test_exec_nonexistent_file():
+def test_file_not_found():
+    """decu should exist when passed a non-existent file."""
     import os
     non_existant = 'totally_non_existent_file.abc'
-    assert 'totally_non_existent_file.abc' not in os.listdir()
+    assert non_existant not in os.listdir()
     with pytest.raises(CalledProcessError):
         check_call(['decu', 'inspect', non_existant])
+    with pytest.raises(CalledProcessError):
+        check_call(['decu', 'exec', non_existant])
 
 
 def test_inspect_wrong_args():
