@@ -7,5 +7,4 @@ install:
   - pip install -r requirements.txt
 before_script: cd test/
 script:
-  - pytest config_test.py
-  - pytest -k "not isolated"
+  - pytest
