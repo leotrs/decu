@@ -55,7 +55,7 @@ def test_exec_no_class(tmpdir):
     with filename.open('w+') as file:
         file.write('import decu\nclass MyScript():\n    pass')
     with pytest.raises(CalledProcessError):
-        check_call(['decu', 'inspect', str(filename)])
+        check_call(['decu', 'exec', str(filename)])
 
 
 def test_exec_empty_file(tmpdir):
@@ -65,7 +65,7 @@ def test_exec_empty_file(tmpdir):
     empty_fn = tmpdir.join(src_dir, 'empty.py')
     empty_fn.open('w+').close()
     with pytest.raises(CalledProcessError):
-        check_call(['decu', 'inspect', str(empty_fn)])
+        check_call(['decu', 'exec', str(empty_fn)])
 
 
 def test_file_not_found():
