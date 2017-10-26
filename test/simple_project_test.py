@@ -13,7 +13,7 @@ from decu import __main__ as main
 from util import make_teardown_fixture
 
 PROJECT_DIR = 'simple_project/'
-teardown = pytest.fixture(scope='module', autouse=True)(
+teardown = pytest.fixture(scope='function', autouse=True)(
     make_teardown_fixture(PROJECT_DIR))
 
 
@@ -41,7 +41,6 @@ def test_exec_multiple_args():
     main.exec_script(['src/script1.py', 'src/script2.py'])
     log_dir = decu.config['Script']['logs_dir']
     assert len(os.listdir(log_dir)) == 2
-
     logs = []
     for log_file in os.listdir(log_dir):
         with open(os.path.join(log_dir, log_file)) as file:

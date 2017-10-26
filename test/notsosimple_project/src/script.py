@@ -7,7 +7,6 @@ This is a test script for decu.
 """
 
 from decu import Script, experiment, figure, run_parallel
-import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -17,7 +16,7 @@ class TestScript(Script):
     @experiment(data_param='data')
     def exp(self, data, param, param2):
         """Compute x**param for each data point."""
-        logging.info('Working hard for {}..'.format(TestScript.exp.run))
+        self.log.info('Working hard for {}..'.format(TestScript.exp.run))
         return np.power(data, param) + param2
 
     @figure()

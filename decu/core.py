@@ -9,6 +9,7 @@ Main decu classes and decorators.
 import os
 import logging
 from .config import config
+from .logging import DecuLogger
 from .io import write
 from functools import wraps
 from datetime import datetime
@@ -35,26 +36,16 @@ class Script():
 
     data_dir = config['Script']['data_dir']
     results_dir = config['Script']['results_dir']
-    logs_dir = config['Script']['logs_dir']
     figures_dir = config['Script']['figures_dir']
     scripts_dir = config['Script']['scripts_dir']
     gendata_dir = config['Script']['gendata_dir']
     figure_fmt = config['Script']['figure_fmt']
-    log_fmt = config['Script']['log_fmt']
-    time_fmt = config['Script']['time_fmt']
 
-    def __init__(self, project_dir=None, module=None):
+    def __init__(self, project_dir="", module=None):
         self.start_time = datetime.now()
         self.project_dir = os.getcwd() if project_dir is None else project_dir
         self.module = self.__module__ if module is None else module
-
-        os.makedirs(self.logs_dir, exist_ok=True)
-        logfile = config['Script'].subs('log_file', time=self.start_time,
-                                        module_name=self.module)
-        logfile = os.path.join(self.project_dir, self.logs_dir, logfile)
-        logging.basicConfig(level=logging.INFO, filename=logfile,
-                            format=self.log_fmt, datefmt=self.time_fmt)
-        self.logfile = logfile
+        self.log = DecuLogger(self.start_time, project_dir, self.module)
 
     def make_result_basename(self, exp_name, run):
         return os.path.join(self.results_dir, config['Script'].subs(
@@ -169,15 +160,15 @@ def experiment(data_param=None):
             os.makedirs(obj.results_dir, exist_ok=True)
 
             values = _get_parameters(method, data_param, args, kwargs)
-            logging.info(exp_start_msg(decorated.run, values))
+            obj.log.info(exp_start_msg(decorated.run, values))
 
             start = time()
             result = method(*args, **kwargs)
             end = time()
-            logging.info(exp_end_msg(decorated.run, values, end - start))
+            obj.log.info(exp_end_msg(decorated.run, values, end - start))
             basename = obj.make_result_basename(exp_name, decorated.run)
             write(result, basename)
-            logging.info(wrote_results_msg(decorated.run, basename, values))
+            obj.log.info(wrote_results_msg(decorated.run, basename, values))
 
             return result
 
@@ -238,7 +229,7 @@ def figure(show=False, save=True):
             if save:
                 outfile = obj.make_figure_basename(fig_name, suffix)
                 fig.savefig(outfile)
-                logging.info(wrote_fig_msg(outfile))
+                obj.log.info(wrote_fig_msg(outfile))
             if show:
                 plt.show()
 
