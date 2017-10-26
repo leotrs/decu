@@ -8,7 +8,13 @@ Reference
     :show-inheritance:
 
 
-.. automodule:: decu.Script
+.. automodule:: decu.core
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+.. automodule:: decu.io
     :members:
     :undoc-members:
     :show-inheritance:

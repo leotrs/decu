@@ -134,8 +134,7 @@ def inspect(files, **kwargs):
     return 0
 
 
-def main():
-    """Execute the script passed as command line argument."""
+def setup_parser():
     import argparse
     parser = argparse.ArgumentParser(description='Experimental computation utilities.')
     subparsers = parser.add_subparsers(help='command', dest='command')
@@ -152,7 +151,12 @@ def main():
     parser_inspect.add_argument('opts', nargs=argparse.REMAINDER,
                                 help='pairs of name and file paths to read '
                                 'as additional variables')
-    args = parser.parse_args()
+    return parser
+
+
+def main():
+    """Execute the script passed as command line argument."""
+    args = setup_parser().parse_args()
 
     if args.command is None:
         parser.print_help()
