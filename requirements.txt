@@ -8,3 +8,4 @@ recommonmark==0.4.0
 Sphinx==1.6.4
 sphinx-rtd-theme==0.2.4
 sphinxcontrib-napoleon==0.6.1
+networkx==2.0
