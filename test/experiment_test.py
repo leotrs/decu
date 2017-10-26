@@ -46,3 +46,19 @@ def test_multiple_params(tmpdir):
     assert filename not in listdir(script.results_dir)
     script.exp(range(100), p1val, p2val)
     assert filename in listdir(script.results_dir)
+
+
+def test_no_data(tmpdir):
+    class TestNoData(util.TestScript):
+        @experiment(data_param=None)
+        def exp(self, data, param1, param2):
+            return np.power(data, param1) + param2
+
+    script = TestNoData(tmpdir)
+    p1val = 4
+    p2val = 10
+    filename = basename(make_fullname(script.make_result_basename('exp', 0)))
+
+    assert filename not in listdir(script.results_dir)
+    script.exp(range(100), p1val, p2val)
+    assert filename in listdir(script.results_dir)
