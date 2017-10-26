@@ -26,13 +26,13 @@ loggers = {}
 
 class DecuLogger():
 
-    logs_dir = config['Script']['logs_dir']
-    log_fmt = config['Script']['log_fmt']
-    time_fmt = config['Script']['time_fmt']
+    logs_dir = config['logging']['logs_dir']
+    log_fmt = config['logging']['log_fmt']
+    time_fmt = config['logging']['time_fmt']
 
     def __init__(self, start_time, project_dir, module):
-        logfile = config['Script'].subs('log_file', time=start_time,
-                                        module_name=module)
+        logfile = config['logging'].subs('log_file', time=start_time,
+                                         module_name=module)
 
         logfile = os.path.join(project_dir, self.logs_dir, logfile)
         logger = logging.getLogger(logfile)

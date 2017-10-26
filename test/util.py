@@ -14,7 +14,7 @@ class TestScript(decu.Script):
     """Script subclass used for testing purposes."""
     def __init__(self, tmpdir):
         cfg = decu.config['Script']
-        self.logs_dir = str(tmpdir.mkdir(cfg['logs_dir']))
+        self.logs_dir = str(tmpdir.mkdir(decu.config['logging']['logs_dir']))
         self.figures_dir = str(tmpdir.mkdir(cfg['figures_dir']))
         self.results_dir = str(tmpdir.mkdir(cfg['results_dir']))
         self.scripts_dir = str(tmpdir.mkdir(cfg['scripts_dir']))
@@ -32,6 +32,7 @@ def make_teardown_fixture(root_dir):
             """Delete all files except scripts."""
             dirs = [v.strip('/') for k, v in decu.config['Script'].items()
                     if k.endswith('_dir')]
+            dirs.append(decu.config['logging']['logs_dir'].strip('/'))
             dirs.remove(decu.config['Script']['scripts_dir'].strip('/'))
             for dir_name in [d for d in dirs if d in os.listdir(root_dir)]:
                 for file in os.listdir(os.path.join(root_dir, dir_name)):

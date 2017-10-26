@@ -21,6 +21,6 @@ def test_exec():
     """Test that `decu exec src/script.py` generates the appropriate files."""
     cfg = decu.config['Script']
     call(['decu', 'exec', '{}/script.py'.format(cfg['scripts_dir'])])
-    assert os.listdir(cfg['logs_dir'])
+    assert os.listdir(decu.config['logging']['logs_dir'])
     assert os.listdir(cfg['figures_dir'])
     assert os.listdir(cfg['results_dir'])

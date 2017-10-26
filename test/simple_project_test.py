@@ -21,7 +21,7 @@ def test_exec_single_arg():
     """`decu exec` should accept one single argument."""
     cfg = decu.config['Script']
     main.exec_script([os.path.join(cfg['scripts_dir'], 'script1.py')])
-    assert len(os.listdir(cfg['logs_dir'])) == 1
+    assert len(os.listdir(decu.config['logging']['logs_dir'])) == 1
     assert len(os.listdir(cfg['results_dir'])) == 1
 
 
@@ -37,7 +37,7 @@ def test_exec_multiple_args():
     from difflib import SequenceMatcher
 
     main.exec_script(['src/script1.py', 'src/script2.py'])
-    log_dir = decu.config['Script']['logs_dir']
+    log_dir = decu.config['logging']['logs_dir']
     assert len(os.listdir(log_dir)) == 2
     logs = []
     for log_file in os.listdir(log_dir):
