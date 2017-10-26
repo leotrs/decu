@@ -13,13 +13,18 @@ from decu import __main__ as main
 from subprocess import check_call, CalledProcessError
 
 
+def test_no_command():
+    """`decu` with no command should print help and exit."""
+    assert check_call(['decu']) == 0
+
+
 def test_init(tmpdir):
     """`decu init` should create the appropriate directories."""
     dir_names = [tmpdir.join(v) for k, v in config['Script'].items()
                  if k.endswith('_dir')]
     for name in dir_names:
         assert name not in tmpdir.listdir()
-    main.init(str(tmpdir))
+    assert main.init(str(tmpdir)) == 0
     for name in dir_names:
         assert name in tmpdir.listdir()
 
