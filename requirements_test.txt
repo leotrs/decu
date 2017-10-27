@@ -8,3 +8,7 @@ pandas==0.20.3
 Sphinx==1.6.4
 sphinx-rtd-theme==0.2.4
 sphinxcontrib-napoleon==0.6.1
+
+networkx==2.0
+numpy==1.13.3
+pandas==0.20.3
