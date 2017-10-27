@@ -150,25 +150,24 @@ def experiment(data_param=None):
         from time import time
 
         @wraps(method)
-        def decorated(*args, **kwargs):
-            obj = args[0]
+        def decorated(self, *args, **kwargs):
             with lock:
                 decorated.run = runs[decorated].value
                 runs[decorated].value += 1
 
             # Make sure the output dir exists
-            os.makedirs(obj.results_dir, exist_ok=True)
+            os.makedirs(self.results_dir, exist_ok=True)
 
             values = _get_parameters(method, data_param, args, kwargs)
-            obj.log.info(exp_start_msg(decorated.run, values))
+            self.log.info(exp_start_msg(decorated.run, values))
 
             start = time()
-            result = method(*args, **kwargs)
+            result = method(self, *args, **kwargs)
             end = time()
-            obj.log.info(exp_end_msg(decorated.run, values, end - start))
-            basename = obj.make_result_basename(exp_name, decorated.run)
+            self.log.info(exp_end_msg(decorated.run, values, end - start))
+            basename = self.make_result_basename(exp_name, decorated.run)
             write(result, basename)
-            obj.log.info(wrote_results_msg(decorated.run, basename, values))
+            self.log.info(wrote_results_msg(decorated.run, basename, values))
 
             return result
 
@@ -219,17 +218,16 @@ def figure(show=False, save=True):
                                          outfile=outfile)
 
         @wraps(method)
-        def decorated(*args, suffix=None, **kwargs):
-            obj = args[0]
+        def decorated(self, *args, suffix=None, **kwargs):
             # Make sure the output dir exists
-            os.makedirs(obj.figures_dir, exist_ok=True)
+            os.makedirs(self.figures_dir, exist_ok=True)
 
-            method(*args, **kwargs)
+            method(self, *args, **kwargs)
             fig = plt.gcf()
             if save:
-                outfile = obj.make_figure_basename(fig_name, suffix)
+                outfile = self.make_figure_basename(fig_name, suffix)
                 fig.savefig(outfile)
-                obj.log.info(wrote_fig_msg(outfile))
+                self.log.info(wrote_fig_msg(outfile))
             if show:
                 plt.show()
 
