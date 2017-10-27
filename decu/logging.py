@@ -35,6 +35,7 @@ class DecuLogger():
                                          module_name=module)
 
         logfile = os.path.join(project_dir, self.logs_dir, logfile)
+        os.makedirs(logfile, exist_ok=True)
         logger = logging.getLogger(logfile)
         logger.setLevel(logging.INFO)
         handler = logging.FileHandler(logfile)
