@@ -211,7 +211,12 @@ def figure(show=False, save=True):
         'suffix' parameter.
 
         """
+        from inspect import getfullargspec
         fig_name = method.__name__
+        spec = getfullargspec(method)
+        if 'suffix' in spec.args or 'suffix' in spec.kwonlyargs:
+            raise DecuException('methods decorated with decu.experiment '
+                                'cannot have a \'suffix\' argument.')
 
         def wrote_fig_msg(outfile):
             return config['figure'].subs('write', fig_name=fig_name,

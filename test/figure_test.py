@@ -8,9 +8,10 @@ Test the @figure decorator.
 
 from os import listdir
 from os.path import basename
-from decu import figure
+from decu import figure, DecuException
 import util
 import matplotlib.pyplot as plt
+import pytest
 
 
 def test_save_false(tmpdir):
@@ -60,3 +61,13 @@ def test_suffix(tmpdir):
     assert fig_filename not in listdir(script.figures_dir)
     script.plot(suffix=suffix)
     assert fig_filename in listdir(script.figures_dir)
+
+
+def test_suffix_override(tmpdir):
+    """@figure-decorated methods cannot have a 'suffix' argument."""
+    with pytest.raises(DecuException):
+        class TestSuffixOverride(util.TestScript):
+            @figure(save=True)
+            def plot(self, suffix):
+                plt.figure()
+                plt.plot(range(100), [x**2 for x in range(100)])
