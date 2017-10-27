@@ -7,7 +7,7 @@ Tests for the decu.io module.
 """
 
 import os
-from numpy.random import random, randint
+from numpy.random import random, randint, choice
 from decu.io import write, read, make_fullname
 
 
@@ -50,9 +50,8 @@ def test_graph(tmpdir):
 def test_series(tmpdir):
     """pd.Series should be handled correctly."""
     import pandas as pd
-    test = lambda o: helper(o, 'series', tmpdir, lambda a, b: (a == b).all())
-    size = 100
-    test(pd.Series(random(size=size)))
+    helper(pd.Series(random(size=100)), 'series', tmpdir,
+           lambda a, b: round(sum(a-b), 10) == 0)
 
 
 def test_dataframe(tmpdir):
@@ -82,6 +81,13 @@ def test_float(tmpdir):
 
 
 def test_dict(tmpdir):
-    for _ in range(2):
+    for _ in range(100):
         helper({str(idx): round(random(), 5) for idx in range(100)},
                'dict', tmpdir)
+
+
+def test_string(tmpdir):
+    from string import ascii_uppercase
+    for _ in range(100):
+        helper(''.join(choice(list(ascii_uppercase), size=100)),
+               'string', tmpdir)

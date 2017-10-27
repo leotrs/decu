@@ -119,4 +119,4 @@ def test_inspect_c_flag():
     assert (loaded == arr + 2).all()
 
     os.remove(fullname)
-    os.remove('array2.txt')
+    os.remove('array2.npy')

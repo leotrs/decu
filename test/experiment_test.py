@@ -24,7 +24,7 @@ def test_write(tmpdir):
     script = TestWrite(tmpdir)
     pval = 4
     result_filename = basename(script.make_result_basename('exp', 0))
-    fullname = make_fullname(result_filename)
+    fullname = make_fullname(result_filename, np.ndarray)
 
     assert fullname not in listdir(script.results_dir)
     script.exp(range(100), pval)
@@ -41,7 +41,8 @@ def test_multiple_params(tmpdir):
     script = TestWrite(tmpdir)
     p1val = 4
     p2val = 10
-    filename = basename(make_fullname(script.make_result_basename('exp', 0)))
+    filename = basename(make_fullname(script.make_result_basename('exp', 0),
+                                      np.ndarray))
 
     assert filename not in listdir(script.results_dir)
     script.exp(range(100), p1val, p2val)
@@ -57,7 +58,8 @@ def test_no_data(tmpdir):
     script = TestNoData(tmpdir)
     p1val = 4
     p2val = 10
-    filename = basename(make_fullname(script.make_result_basename('exp', 0)))
+    filename = basename(make_fullname(script.make_result_basename('exp', 0),
+                                      np.ndarray))
 
     assert filename not in listdir(script.results_dir)
     script.exp(range(100), p1val, p2val)
