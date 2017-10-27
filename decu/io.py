@@ -8,17 +8,10 @@ Reading and writing functionality for decu.
 
 import os
 import json
-import numpy as np
-import pandas as pd
-import networkx as nx
 
 __all__ = ['write', 'read']
 
 write_funcs = {
-    np.ndarray: lambda fn, res: np.save(fn, res),
-    pd.DataFrame: lambda fn, res: res.to_csv(fn),
-    pd.Series: lambda fn, res: res.to_csv(fn),
-    nx.Graph: lambda fn, res: nx.write_gml(res, fn),
     int: lambda fn, res: _simple_write(fn, res, fmt=':d'),
     float: lambda fn, res: _simple_write(fn, res, fmt=':f'),
     str: lambda fn, res: _simple_write(fn, res),
@@ -26,9 +19,6 @@ write_funcs = {
 }
 
 read_funcs = {
-    'npy': lambda fn: np.load(fn),
-    'csv': lambda fn: _read_csv(fn),
-    'gml': lambda fn: nx.read_gml(fn, destringizer=int),
     'int': lambda fn: _simple_read(fn, int),
     'txt': lambda fn: _simple_read(fn, str),
     'json': lambda fn: _json_read(fn),
@@ -36,10 +26,6 @@ read_funcs = {
 }
 
 extensions = {
-    np.ndarray: 'npy',
-    pd.DataFrame: 'csv',
-    pd.Series: 'csv',
-    nx.Graph: 'gml',
     int: 'int',
     float: 'float',
     str: 'txt',
@@ -77,15 +63,6 @@ def _json_read(filename):
         return json.load(file)
 
 
-def _read_csv(filename):
-    """Read a csv and return a DataFrame or Series."""
-    loaded = pd.read_csv(filename, index_col=0)
-    if len(loaded.columns) == 1:
-        return pd.read_csv(filename, index_col=0, header=None)[1]
-    else:
-        return loaded
-
-
 def write(result, basename):
     """Write result to disk."""
     filename = make_fullname(basename, type(result))
@@ -97,3 +74,43 @@ def read(infile):
     _, ext = os.path.splitext(infile)
     ext = ext.strip('.')
     return read_funcs[ext](infile)
+
+
+try:
+    import networkx as nx
+    extensions[nx.Graph] = 'gml'
+    write_funcs[nx.Graph] = lambda fn, res: nx.write_gml(res, fn)
+    read_funcs['gml'] = lambda fn: nx.read_gml(fn, destringizer=int)
+
+except ImportError:
+    pass
+
+
+try:
+    import pandas as pd
+    extensions[pd.DataFrame] = 'csv'
+    extensions[pd.Series] = 'csv'
+    write_funcs[pd.DataFrame] = lambda fn, res: res.to_csv(fn)
+    write_funcs[pd.Series] = lambda fn, res: res.to_csv(fn)
+    read_funcs['csv'] = lambda fn: _read_csv(fn)
+
+    def _read_csv(filename):
+        """Read a csv and return a DataFrame or Series."""
+        loaded = pd.read_csv(filename, index_col=0)
+        if len(loaded.columns) == 1:
+            return pd.read_csv(filename, index_col=0, header=None)[1]
+        else:
+            return loaded
+
+except ImportError:
+    pass
+
+
+try:
+    import numpy as np
+    extensions[np.ndarray] = 'npy'
+    write_funcs[np.ndarray] = lambda fn, res: np.save(fn, res)
+    read_funcs['npy'] = lambda fn: np.load(fn)
+
+except ImportError:
+    pass
