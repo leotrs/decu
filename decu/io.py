@@ -7,6 +7,7 @@ Reading and writing functionality for decu.
 """
 
 import os
+import json
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -21,7 +22,8 @@ write_funcs.update({
     pd.DataFrame: lambda fn, res: res.to_csv(fn),
     nx.Graph: lambda fn, res: nx.write_gml(res, fn),
     int: lambda fn, res: _simple_write(fn, res, fmt=':d'),
-    float: lambda fn, res: _simple_write(fn, res, fmt=':f')
+    float: lambda fn, res: _simple_write(fn, res, fmt=':f'),
+    dict: lambda fn, res: _json_write(fn, res)
 })
 
 read_funcs = {
@@ -30,7 +32,7 @@ read_funcs = {
     'gml': lambda fn: nx.read_gml(fn, destringizer=int),
     'int': lambda fn: _simple_read(fn, int),
     'float': lambda fn: _simple_read(fn, float),
-    'json': lambda fn: _read_json(fn)
+    'json': lambda fn: _json_read(fn)
 }
 
 extensions = defaultdict(lambda: 'txt')
@@ -56,15 +58,20 @@ def _simple_write(filename, obj, fmt=None):
         file.write(string)
 
 
-def _read_json(filename):
-    with open(filename) as file:
-        return json.load(file)
-
-
 def _simple_read(filename, converter):
     """Read a file written with _simple_write."""
     with open(filename) as file:
         return converter(file.read())
+
+
+def _json_write(filename, res):
+    with open(filename, 'w+') as file:
+        return json.dump(res, file)
+
+
+def _json_read(filename):
+    with open(filename) as file:
+        return json.load(file)
 
 
 def write(result, basename):

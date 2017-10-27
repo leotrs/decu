@@ -81,6 +81,7 @@ def test_float(tmpdir):
         helper(round(random(), 5), 'float', tmpdir)
 
 
-# def test_dict(tmpdir):
-#     for _ in range(100):
-#         helper({idx: round(random(), 5) for idx in range(100)}, 'dict', tmpdir)
+def test_dict(tmpdir):
+    for _ in range(2):
+        helper({str(idx): round(random(), 5) for idx in range(100)},
+               'dict', tmpdir)
