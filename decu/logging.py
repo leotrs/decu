@@ -26,16 +26,17 @@ loggers = {}
 
 class DecuLogger():
 
-    logs_dir = config['logging']['logs_dir']
-    log_fmt = config['logging']['log_fmt']
-    time_fmt = config['logging']['time_fmt']
-
     def __init__(self, start_time, project_dir, module):
-        logfile = config['logging'].subs('log_file', time=start_time,
-                                         module_name=module)
+        self.logs_dir = config['logging']['logs_dir']
+        self.log_fmt = config['logging']['log_fmt']
+        self.time_fmt = config['logging']['time_fmt']
 
-        logfile = os.path.join(project_dir, self.logs_dir, logfile)
+        logfile = os.path.join(
+            project_dir, self.logs_dir, config['logging'].subs(
+                'log_file', time=start_time, module_name=module))
         os.makedirs(os.path.dirname(logfile), exist_ok=True)
+        self.logfile = logfile
+
         logger = logging.getLogger(logfile)
         logger.setLevel(logging.INFO)
         handler = logging.FileHandler(logfile)
@@ -43,7 +44,6 @@ class DecuLogger():
         formatter = logging.Formatter(self.log_fmt, datefmt=self.time_fmt)
         handler.setFormatter(formatter)
         logger.addHandler(handler)
-        self.logfile = logfile
         loggers[logfile] = logger
 
     def log(self, level, msg):
