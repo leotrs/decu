@@ -29,12 +29,14 @@ def test_exec_multiple_args():
     """`decu exec` on two equal scripts should generate two equal log files.
 
     This is a randomized test. The log files will be equal, except for the
-    time stamps and the elapsed time, and these two times will change every
-    time we run the test suite. What we really check is that the logs are
-    within a percentage similarity of each other.
+    time stamps appearing in the name of the result files. Thus, what we
+    really check is that the logs are within a percentage similarity of
+    each other.
 
     """
     from difflib import SequenceMatcher
+    decu.config.set('logging', 'log_fmt', '%(levelname)s: %(message)s')
+    decu.config.set('experiment', 'end_msg', 'Finished $exp_name--$run.')
 
     main.exec_script(['src/script1.py', 'src/script2.py'])
     log_dir = decu.config['logging']['logs_dir']
@@ -44,4 +46,5 @@ def test_exec_multiple_args():
         with open(os.path.join(log_dir, log_file)) as file:
             logs.append(file.read())
     differ = SequenceMatcher(a=logs[0], b=logs[1])
-    assert differ.ratio() > 0.85
+
+    assert differ.ratio() > 0.93
