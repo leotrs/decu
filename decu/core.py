@@ -110,7 +110,7 @@ def experiment(data_param=None):
     Args:
 
         data_param (str): Parameter treated by the method as data
-    input. All other parameters are treated as experimental parameters.
+        input. All other parameters are treated as experimental parameters.
 
     Returns:
         func: A decorator that adds bookkeeping functionality to its
