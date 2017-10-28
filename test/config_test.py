@@ -11,9 +11,14 @@ import decu
 from decu import __main__ as main
 
 
-# @pytest.mark.isolated
+def test_config_file_in_place():
+    """`decu.cfg` should be in the right place."""
+    from decu.config import config_filename
+    assert config_filename in os.listdir('../decu/')
+
+
 def test_local_override(tmpdir):
-    """Test whether a local file overrides default options."""
+    """A local config file should override the default options."""
     config_filename = 'decu.cfg'
     new_opt = '${time}.log'
     config = '[logging]\nlog_file = {}'.format(new_opt)

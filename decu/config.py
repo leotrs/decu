@@ -4,6 +4,8 @@ from string import Template
 
 __all__ = ['config']
 
+config_filename = 'decu.cfg'
+
 
 class DecuParser(configparser.ConfigParser):
     def subs(self, section, option, **kwargs):
@@ -17,6 +19,6 @@ class DecuSectionProxy(configparser.SectionProxy):
 
 configparser.SectionProxy = DecuSectionProxy
 config = DecuParser(interpolation=None)
-config.read([os.path.join(os.path.dirname(__file__), 'decu.cfg'),
-             os.path.expanduser('~/.decu.cfg'),
-             os.path.join(os.getcwd(), 'decu.cfg')])
+config.read([os.path.join(os.path.dirname(__file__), config_filename),
+             os.path.expanduser('~/.{}'.format(config_filename)),
+             os.path.join(os.getcwd(), config_filename)])
