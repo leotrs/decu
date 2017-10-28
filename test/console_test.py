@@ -118,5 +118,5 @@ def test_inspect_c_flag():
     loaded = decu.io.read(decu.io.make_fullname('array2', type(arr)))
     assert (loaded == arr + 2).all()
 
-    os.remove(fullname)
-    os.remove('array2.npy')
+    os.remove(decu.io.make_fullname('array', type(arr)))
+    os.remove(decu.io.make_fullname('array2', type(arr)))
