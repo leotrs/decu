@@ -47,6 +47,13 @@ source_suffix = ['.rst', '.md']
 from recommonmark.parser import CommonMarkParser
 source_parsers = {'.md': CommonMarkParser}
 
+from recommonmark.transform import AutoStructify
+def setup(app):
+    app.add_config_value(
+        'recommonmark_config', {'enable_eval_rst': True}, True)
+    app.add_transform(AutoStructify)
+
+
 # The master toctree document.
 master_doc = 'index'
 

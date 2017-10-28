@@ -47,4 +47,5 @@ and `2
 
    quickstart
    tutorial
+   customization
    decu

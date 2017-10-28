@@ -18,3 +18,15 @@ Reference
     :members:
     :undoc-members:
     :show-inheritance:
+
+
+.. automodule:: decu.logging
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+.. automodule:: decu.config
+    :members:
+    :undoc-members:
+    :show-inheritance:

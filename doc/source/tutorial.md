@@ -3,7 +3,7 @@
 This is the `decu` tutorial. Follow a long for a tour of `decu`'s main
 features.
 
-## Example
+## Example Project
 
 After you have installed `decu` in your (virtual) environment, you can
 follow along with this example project. This example will showcase the
@@ -370,6 +370,32 @@ In [1]: script.fig(data, result)
 In [2]: exit
 ```
 
-And the final result is:
+And in that case, yet another possibility, and the most efficient one, is
+to use the `-c` flag:
 
-![decu is awesome](_static/fig_file2.png "decu is wonderful")
+```
+$ decu inspect -c "script.fig(data, result)" \
+result_dict=results/result_file3* \
+--data=data/data_file1.txt
+
+import decu
+import numpy as np
+import src.script as script
+script = script.MyScript('/tmp/root_dir', 'script')
+# loaded result
+# loaded data
+script.fig(data, result)
+exit
+
+$
+```
+
+The `-c` flag takes an arbitrary string, executes it after the initial file
+loading is done, and then quits ipython. This makes it possible to fix our
+figure in a single `decu` call, without having to drop to an interpreter or
+manually load anything. Nifty, yes?
+
+
+The final result is:
+
+![decu is awesome](_static/fig_file2.png "decu is awesome")
