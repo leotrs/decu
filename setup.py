@@ -27,6 +27,7 @@ setup(
     license='MIT',
     packages=find_packages(),
     entry_points={'console_scripts': ['decu=decu.__main__:main']},
+    install_requires=get_requirements(),
     zip_safe=False,
     data_files=[('decu/', ['decu/decu.cfg'])],
     include_package_data=True,
