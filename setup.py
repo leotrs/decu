@@ -19,6 +19,7 @@ setup(
     name='decu',
     version='0.0.1',
     url='https://github.com/leotrs/decu',
+    download_url='https://github.com/leotrs/decdu/archive/0.0.1.tar.gz',
     author='Leo Torres',
     author_email='leo@leotrs.com',
     description='Decu is a Experimental Computation Utility',
