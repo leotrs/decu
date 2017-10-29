@@ -17,9 +17,9 @@ def get_requirements(suffix=''):
 
 setup(
     name='decu',
-    version='v0.0.2-rc1',
+    version='v0.0.2-rc2',
     url='https://github.com/leotrs/decu',
-    download_url='https://github.com/leotrs/decu/archive/v0.0.2-rc1.tar.gz',
+    download_url='https://github.com/leotrs/decu/archive/v0.0.2-rc2.tar.gz',
     author='Leo Torres',
     author_email='leo@leotrs.com',
     description='Decu is a Experimental Computation Utility',
