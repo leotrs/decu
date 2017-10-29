@@ -9,4 +9,3 @@ test/test_project/results/
 test/test_project/data/
 doc/build/
 .coverage*
-.pypirc
