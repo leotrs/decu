@@ -72,8 +72,7 @@ def run_parallel(exp, params):
         params (list): Each element is a set of arguments to call `exp` with.
 
     Returns:
-        dict: A dictionary where the key `pi` is an element of `params` and
-        the value is the result of calling `exp(*pi)`.
+        list: The result of calling `exp(*pi)` over each element of params.
 
     """
     def init(*args):
@@ -90,7 +89,7 @@ def _get_parameters(method, param_name, args, kwargs):
     """Return the arguments passed to all experimental parameters.
 
     All method arguments that are not param_name are treated as
-    experimental parameter is method is assumed to have been called as
+    experimental parameters. method is assumed to have been called as
     method(*args, **kwargs).
 
     """
