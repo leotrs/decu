@@ -10,7 +10,7 @@ from os import listdir
 from os.path import basename
 import util
 import numpy as np
-from decu import experiment
+from decu import experiment, config
 from decu.io import make_fullname
 
 
@@ -64,3 +64,21 @@ def test_no_data(tmpdir):
     assert filename not in listdir(script.results_dir)
     script.exp(range(100), p1val, p2val)
     assert filename in listdir(script.results_dir)
+
+
+def test_no_result(tmpdir):
+    """@experiment-decorated methods should support no return value."""
+    class TestNoResult(util.TestScript):
+        @experiment(data_param=None)
+        def exp(self):
+            return None
+
+    fmt = '%(levelname)s: %(message)s'
+    config.set('logging', 'log_fmt', fmt)
+    script = TestNoResult(tmpdir)
+    script.exp()
+    with open(script.log.logfile) as file:
+        line = file.readlines()[-1].strip()
+    msg = config['experiment'].subs('no_result_msg', exp_name='exp', run=0)
+    assert line == '%(levelname)s: %(message)s' % \
+        {'levelname': 'WARNING', 'message': msg}

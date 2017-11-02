@@ -146,6 +146,10 @@ def experiment(data_param=None):
             return cfg.subs('write_msg', exp_name=exp_name, params=params,
                             outfile=outfile, run=run)
 
+        def no_result_msg(run, params):
+            return cfg.subs('no_result_msg', exp_name=exp_name, params=params,
+                            run=run)
+
         from time import time
 
         @wraps(method)
@@ -164,9 +168,13 @@ def experiment(data_param=None):
             result = method(self, *args, **kwargs)
             end = time()
             self.log.info(exp_end_msg(decorated.run, values, end - start))
-            basename = self.make_result_basename(exp_name, decorated.run)
-            write(result, basename)
-            self.log.info(wrote_results_msg(decorated.run, basename, values))
+
+            if result is not None:
+                basename = self.make_result_basename(exp_name, decorated.run)
+                write(result, basename)
+                self.log.info(wrote_results_msg(decorated.run, basename, values))
+            else:
+                self.log.warning(no_result_msg(decorated.run, values))
 
             return result
 
