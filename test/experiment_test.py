@@ -15,7 +15,7 @@ from decu.io import make_fullname
 
 
 def test_write(tmpdir):
-    """Test that @experiment-decorated methods write their results to disk."""
+    """@experiment-decorated methods should write their results to disk."""
     class TestWrite(util.TestScript):
         @experiment(data_param='data')
         def exp(self, data, param):
@@ -32,7 +32,7 @@ def test_write(tmpdir):
 
 
 def test_multiple_params(tmpdir):
-    """Test that @experiment-decorated methods support multiple parameters."""
+    """@experiment-decorated methods should support multiple parameters."""
     class TestWrite(util.TestScript):
         @experiment(data_param='data')
         def exp(self, data, param1, param2):
@@ -50,6 +50,7 @@ def test_multiple_params(tmpdir):
 
 
 def test_no_data(tmpdir):
+    """@experiment-decorated methods should support no data_param."""
     class TestNoData(util.TestScript):
         @experiment(data_param=None)
         def exp(self, data, param1, param2):
